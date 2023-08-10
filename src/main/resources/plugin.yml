@@ -1,0 +1,4 @@
+name: StaffProtect
+version: '${version}'
+main: net.experience.powered.staffprotect.StaffProtect
+api-version: '1.20'

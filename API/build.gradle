@@ -1,0 +1,15 @@
+plugins {
+    id 'maven-publish'
+    id 'java'
+}
+
+group = 'net.experienced.powered.staffprotect'
+version = '1.0-SNAPSHOT'
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from components.java
+        }
+    }
+}
