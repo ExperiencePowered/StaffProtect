@@ -1,4 +1,13 @@
 # Any message in this config is following MiniMessage format, for more, please head to https://docs.advntr.dev/minimessage/format.html
 notification:
-  creative-tracking: "<red>Player <blue><player> <red>has clicked on item <gold><item></gold> in CREATIVE mode."
-  gamemode-change: "<blue><player> executed command <gold><command></gold>"
+  creative-tracking:
+    message: "<red>Player <blue><player> <red>has clicked on item <gold><item></gold> in CREATIVE mode."
+    # Replacements change material name, look on example for more info
+    replacements:
+      # The material name "DIRT" will be replaced with "CORRUPTED DIRT"
+      # Look also how you can change color with MiniMessage
+      DIRT: "<amount>x <purple>CORRUPTED DIRT"
+      # Stay uppercase, if any of the keys are lowercase, it won't work,
+      # If material name has space instead of space replace it with _
+      # This is meant just to key, value ("<purple>CORRUPTED DIRT") can be with spaces
+  command-executed: "<blue><player></blue> <red>executed command <gold><command></gold>."
