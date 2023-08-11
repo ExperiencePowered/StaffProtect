@@ -45,7 +45,7 @@ public class PlayerListener implements Listener {
     public void PlayerCommandExecute(final @NotNull PlayerCommandPreprocessEvent e) {
         final Player player = e.getPlayer();
         final var configuration = plugin.getConfig();
-        final var string = configuration.getString("notification.gamemode-change", "String not found.");
+        final var string = configuration.getString("notification.command-executed", "String not found.");
         final var miniMessage = MiniMessage.miniMessage();
         final var component = miniMessage.deserialize(string, Placeholder.parsed("player", player.getName()), Placeholder.parsed("command", e.getMessage()));
         final var notificationManager = NotificationManager.getInstance(api.getNotificationBus());
