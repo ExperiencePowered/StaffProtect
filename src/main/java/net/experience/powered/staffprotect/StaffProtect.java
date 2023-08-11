@@ -12,6 +12,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -19,16 +20,27 @@ import java.util.UUID;
 
 public final class StaffProtect extends JavaPlugin {
 
-    private StaffProtectAPI api;
     private Permission permission = new Permission() {};
 
     @Override
     public void onEnable() {
-        saveDefaultConfig();
-
+        if (!new File(getDataFolder(), "config.yml").exists()) {
+            saveResource("config.yml", false);
+        }
         if (Bukkit.getPluginManager().isPluginEnabled("LuckPerms")) {
             this.permission = new LuckPermsHook();
         }
+
+        final var api = getStaffProtectAPI();
+        Bukkit.getServicesManager().register(StaffProtectAPI.class, api, this, ServicePriority.Normal);
+
+        final var pluginManager = Bukkit.getPluginManager();
+        pluginManager.registerEvents(new InventoryListener(api), this);
+        pluginManager.registerEvents(new PlayerListener(api), this);
+    }
+
+    @NotNull
+    private StaffProtectAPIImpl getStaffProtectAPI() {
         final NotificationBus bus = new NotificationBus() {
 
             private final List<UUID> subscribers = new ArrayList<>();
@@ -48,11 +60,6 @@ public final class StaffProtect extends JavaPlugin {
                 return Collections.unmodifiableList(subscribers);
             }
         };
-        this.api = new StaffProtectAPIImpl(permission, bus);
-        Bukkit.getServicesManager().register(StaffProtectAPI.class, api, this, ServicePriority.Normal);
-
-        final var pluginManager = Bukkit.getPluginManager();
-        pluginManager.registerEvents(new InventoryListener(api), this);
-        pluginManager.registerEvents(new PlayerListener(api), this);
+        return new StaffProtectAPIImpl(permission, bus);
     }
 }
