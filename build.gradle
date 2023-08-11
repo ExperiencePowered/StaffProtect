@@ -6,6 +6,7 @@ plugins {
 
 shadowJar {
     minimize()
+    relocate 'net.kyori', 'net.experience.powered.net.kyori'
 }
 
 tasks {
@@ -30,6 +31,7 @@ repositories {
 }
 
 dependencies {
+    implementation "net.kyori:adventure-platform-bukkit:4.3.0"
     implementation(project(":API"))
     compileOnly("net.luckperms:api:5.4")
     compileOnly "io.papermc.paper:paper-api:1.20-R0.1-SNAPSHOT"
