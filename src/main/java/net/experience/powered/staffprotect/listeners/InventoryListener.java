@@ -1,8 +1,13 @@
 package net.experience.powered.staffprotect.listeners;
 
+import net.experience.powered.staffprotect.StaffProtect;
 import net.experience.powered.staffprotect.StaffProtectAPI;
 import net.experience.powered.staffprotect.notification.NotificationManager;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
+import org.bukkit.GameMode;
+import org.bukkit.Material;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -11,14 +16,36 @@ import org.jetbrains.annotations.NotNull;
 public class InventoryListener implements Listener {
 
     private final StaffProtectAPI api;
+    private final StaffProtect plugin;
 
     public InventoryListener(final @NotNull StaffProtectAPI api) {
         this.api = api;
+        this.plugin = StaffProtect.getPlugin(StaffProtect.class);
     }
 
     @EventHandler
     public void InventoryTrack(final @NotNull InventoryClickEvent e) {
-        final var notification = NotificationManager.getInstance(api.getNotificationBus());
-        notification.sendMessage(MiniMessage.miniMessage().deserialize("<red>Hey this is test notification!"));
+        final Player player = (Player) e.getWhoClicked();
+        if (!player.getGameMode().equals(GameMode.CREATIVE)) return;
+        if (e.getCurrentItem() == null) return;
+
+        // TO DO: Add multiple messages as there are multiple actions
+        //switch (e.getAction()) {
+        //
+        //}
+
+        var itemStack = e.getCurrentItem();
+        if (itemStack.getType() == Material.AIR)
+            if (e.getClickedInventory() != null)
+                itemStack = e.getClickedInventory().getItem(e.getSlot());
+        if (itemStack == null) return;
+
+        final var item = itemStack.getAmount() + "x " + "<lang:block.minecraft." + itemStack.getType().name().toLowerCase() + ">";
+        final var string = plugin.getConfig().getString("notification.inventory-creative.tracking", "String not found.");
+        final var miniMessage = MiniMessage.miniMessage();
+        final var component = miniMessage.deserialize(string, Placeholder.parsed("player", player.getName()), Placeholder.parsed("item", item));
+        final var notificationManager = NotificationManager.getInstance(api.getNotificationBus());
+
+        notificationManager.sendMessage(component);
     }
 }
