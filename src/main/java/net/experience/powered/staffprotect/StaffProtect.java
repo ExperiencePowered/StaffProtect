@@ -23,6 +23,8 @@ public final class StaffProtect extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        saveDefaultConfig();
+
         if (Bukkit.getPluginManager().isPluginEnabled("LuckPerms")) {
             this.permission = new LuckPermsHook();
         }
