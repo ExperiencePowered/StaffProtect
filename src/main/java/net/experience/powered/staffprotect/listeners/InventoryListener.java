@@ -41,7 +41,7 @@ public class InventoryListener implements Listener {
         if (itemStack == null) return;
 
         final var item = itemStack.getAmount() + "x " + "<lang:block.minecraft." + itemStack.getType().name().toLowerCase() + ">";
-        final var string = plugin.getConfig().getString("notification.inventory-creative.tracking", "String not found.");
+        final var string = plugin.getConfig().getString("notification.creative-tracking", "String not found.");
         final var miniMessage = MiniMessage.miniMessage();
         final var component = miniMessage.deserialize(string, Placeholder.parsed("player", player.getName()), Placeholder.parsed("item", item));
         final var notificationManager = NotificationManager.getInstance(api.getNotificationBus());

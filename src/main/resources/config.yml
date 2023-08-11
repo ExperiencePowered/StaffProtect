@@ -1,4 +1,4 @@
 # Any message in this config is following MiniMessage format, for more, please head to https://docs.advntr.dev/minimessage/format.html
 notification:
-  inventory-creative:
-    tracking: "<red>Player <blue><player> <red>has clicked on item <gold><item></gold> in CREATIVE mode."
+  creative-tracking: "<red>Player <blue><player> <red>has clicked on item <gold><item></gold> in CREATIVE mode."
+  gamemode-change: "<blue><player> executed command <gold><command></gold>"
