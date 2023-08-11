@@ -3,16 +3,17 @@ package net.experience.powered.staffprotect;
 import net.experience.powered.staffprotect.hooks.LuckPermsHook;
 import net.experience.powered.staffprotect.impl.StaffProtectAPIImpl;
 import net.experience.powered.staffprotect.listeners.InventoryListener;
-import net.experience.powered.staffprotect.listeners.PlayerConnectionListener;
+import net.experience.powered.staffprotect.listeners.PlayerListener;
 import net.experience.powered.staffprotect.interfaces.Permission;
 import net.experience.powered.staffprotect.notification.NotificationBus;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.UnmodifiableView;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -42,10 +43,9 @@ public final class StaffProtect extends JavaPlugin {
                 subscribers.remove(uuid);
             }
 
-            @Contract(pure = true)
             @Override
-            public @NotNull List<UUID> getSubscribers() {
-                return subscribers;
+            public @NotNull @UnmodifiableView List<UUID> getSubscribers() {
+                return Collections.unmodifiableList(subscribers);
             }
         };
         this.api = new StaffProtectAPIImpl(permission, bus);
@@ -53,6 +53,6 @@ public final class StaffProtect extends JavaPlugin {
 
         final var pluginManager = Bukkit.getPluginManager();
         pluginManager.registerEvents(new InventoryListener(api), this);
-        pluginManager.registerEvents(new PlayerConnectionListener(api), this);
+        pluginManager.registerEvents(new PlayerListener(api), this);
     }
 }
