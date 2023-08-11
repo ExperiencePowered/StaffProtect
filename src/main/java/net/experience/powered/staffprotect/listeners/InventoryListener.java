@@ -40,10 +40,21 @@ public class InventoryListener implements Listener {
                 itemStack = e.getClickedInventory().getItem(e.getSlot());
         if (itemStack == null) return;
 
-        final var item = itemStack.getAmount() + "x " + "<lang:block.minecraft." + itemStack.getType().name().toLowerCase() + ">";
-        final var string = plugin.getConfig().getString("notification.creative-tracking", "String not found.");
+        var item = "";
+
+        final var configuration = plugin.getConfig();
+        final var replacement = configuration.getString("notification.creative-tracking.replacements." + itemStack.getType().name());
+        if (replacement != null) {
+            item = replacement.replace("<amount>", "" + itemStack.getAmount());
+        }
+        else {
+            item = itemStack.getAmount() + "x " + "<lang:block.minecraft." + itemStack.getType().name().toLowerCase() + ">";
+        }
+
+        final var fItem = item;
+        final var string = configuration.getString("notification.creative-tracking.message", "String not found.");
         final var miniMessage = MiniMessage.miniMessage();
-        final var component = miniMessage.deserialize(string, Placeholder.parsed("player", player.getName()), Placeholder.parsed("item", item));
+        final var component = miniMessage.deserialize(string, Placeholder.parsed("player", player.getName()), Placeholder.parsed("item", fItem));
         final var notificationManager = NotificationManager.getInstance(api.getNotificationBus());
 
         notificationManager.sendMessage(component);
