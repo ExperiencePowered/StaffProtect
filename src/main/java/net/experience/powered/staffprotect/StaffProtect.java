@@ -60,6 +60,6 @@ public final class StaffProtect extends JavaPlugin {
                 return Collections.unmodifiableList(subscribers);
             }
         };
-        return new StaffProtectAPIImpl(permission, bus);
+        return new StaffProtectAPIImpl(this, permission, bus);
     }
 }
