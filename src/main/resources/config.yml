@@ -6,8 +6,8 @@ notification:
     replacements:
       # The material name "DIRT" will be replaced with "CORRUPTED DIRT"
       # Look also how you can change color with MiniMessage
-      DIRT: "<amount>x <purple>CORRUPTED DIRT"
+      DIRT: "<amount>x <dark_purple>CORRUPTED DIRT"
       # Stay uppercase, if any of the keys are lowercase, it won't work,
       # If material name has space instead of space replace it with _
       # This is meant just to key, value ("<purple>CORRUPTED DIRT") can be with spaces
-  command-executed: "<blue><player></blue> <red>executed command <gold><command></gold>."
+  command-executed: "<red>Player <blue><player></blue> executed command <gold><command></gold>."
