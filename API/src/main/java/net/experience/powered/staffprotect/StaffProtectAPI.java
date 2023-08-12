@@ -3,8 +3,10 @@ package net.experience.powered.staffprotect;
 import net.experience.powered.staffprotect.interfaces.Permission;
 import net.experience.powered.staffprotect.notification.NotificationBus;
 import org.bukkit.Bukkit;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.ServicesManager;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
@@ -27,6 +29,12 @@ public interface StaffProtectAPI {
      * @return notification bus class with some methods related to logging
      */
     @NotNull NotificationBus getNotificationBus();
+
+    /**
+     * Gets plugin instance which loaded this class
+     * @return plugin class
+     */
+    @NotNull JavaPlugin getPlugin();
 
     /**
      * Gets instance directly, so you don't have to write code for getting instance

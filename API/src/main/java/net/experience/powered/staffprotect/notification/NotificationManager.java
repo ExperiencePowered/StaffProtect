@@ -1,9 +1,11 @@
 package net.experience.powered.staffprotect.notification;
 
 import net.experience.powered.staffprotect.StaffProtectAPI;
+import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
@@ -15,9 +17,11 @@ import java.util.concurrent.CompletableFuture;
 public class NotificationManager {
 
     private final NotificationBus bus;
+    private final JavaPlugin plugin;
 
-    public NotificationManager(final @NotNull NotificationBus bus) {
+    public NotificationManager(final @NotNull JavaPlugin plugin, final @NotNull NotificationBus bus) {
         this.bus = bus;
+        this.plugin = plugin;
     }
 
     /**
@@ -25,6 +29,7 @@ public class NotificationManager {
      * @param component message to send
      */
     public void sendMessage(final @NotNull Component component) {
+        final var audience = BukkitAudiences.create(plugin);
         bus.getSubscribers().forEach(uuid -> {
             // Get player async
             final var future = CompletableFuture.supplyAsync(() -> Bukkit.getPlayer(uuid));
@@ -32,8 +37,7 @@ public class NotificationManager {
                 if (player == null) {
                     throw new IllegalStateException("Player is offline, but is still subscribing to notifications");
                 }
-                // Send message async
-                player.sendMessage(component);
+                audience.player(uuid).sendMessage(component);
             });
         });
     }
@@ -45,6 +49,7 @@ public class NotificationManager {
      */
     @Deprecated(forRemoval = true)
     public void sendMessage(final @NotNull String string) {
+        final var audience = BukkitAudiences.create(plugin);
         // Serializes string to component
         final var component = LegacyComponentSerializer.legacyAmpersand().deserialize(string);
         bus.getSubscribers().forEach(uuid -> {
@@ -54,28 +59,18 @@ public class NotificationManager {
                 if (player == null) {
                     throw new IllegalStateException("Player is offline, but is still subscribing to notifications");
                 }
-                // Send message async
-                player.sendMessage(component);
+                audience.player(uuid).sendMessage(component);
             });
         });
     }
 
     /**
-     * Creates new instance with specified param
-     * @param bus notification bus which contains all subscribers
-     * @return new instance of this class
-     */
-    @Contract(value = "_ -> new", pure = true)
-    public static @NotNull NotificationManager getInstance(final @NotNull NotificationBus bus) {
-        return new NotificationManager(bus);
-    }
-
-    /**
-     * Creates new instance with notification bus got from static singleton of StaffProtectAPI ({@link StaffProtectAPI#getInstance()}), it is recommended to use {@link NotificationManager#getInstance(NotificationBus)} instead
+     * Creates new instance with notification bus got from static singleton of StaffProtectAPI
      * @return new instance of this class
      */
     @Contract(" -> new")
     public static @NotNull NotificationManager getInstance() {
-        return getInstance(StaffProtectAPI.getInstance().getNotificationBus());
+        final var api = StaffProtectAPI.getInstance();
+        return new NotificationManager(api.getPlugin(), api.getNotificationBus());
     }
 }
