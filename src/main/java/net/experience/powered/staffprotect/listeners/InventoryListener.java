@@ -55,7 +55,7 @@ public class InventoryListener implements Listener {
         final var string = configuration.getString("notification.creative-tracking.message", "String not found.");
         final var miniMessage = MiniMessage.miniMessage();
         final var component = miniMessage.deserialize(string, Placeholder.parsed("player", player.getName()), Placeholder.parsed("item", fItem));
-        final var notificationManager = NotificationManager.getInstance(api.getNotificationBus());
+        final var notificationManager = NotificationManager.getInstance();
 
         notificationManager.sendMessage(component);
     }

@@ -48,7 +48,7 @@ public class PlayerListener implements Listener {
         final var string = configuration.getString("notification.command-executed", "String not found.");
         final var miniMessage = MiniMessage.miniMessage();
         final var component = miniMessage.deserialize(string, Placeholder.parsed("player", player.getName()), Placeholder.parsed("command", e.getMessage()));
-        final var notificationManager = NotificationManager.getInstance(api.getNotificationBus());
+        final var notificationManager = NotificationManager.getInstance();
 
         notificationManager.sendMessage(component);
     }
