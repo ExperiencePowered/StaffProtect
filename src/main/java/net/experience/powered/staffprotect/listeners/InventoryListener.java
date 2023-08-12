@@ -40,10 +40,10 @@ public class InventoryListener implements Listener {
                 itemStack = e.getClickedInventory().getItem(e.getSlot());
         if (itemStack == null) return;
 
-        var item = "";
-
         final var configuration = plugin.getConfig();
         final var replacement = configuration.getString("notification.creative-tracking.replacements." + itemStack.getType().name());
+
+        String item;
         if (replacement != null) {
             item = replacement.replace("<amount>", "" + itemStack.getAmount());
         }
