@@ -13,8 +13,24 @@ import org.jetbrains.annotations.NotNull;
  */
 public abstract class AbstractAddon extends JavaPlugin {
 
+    private final GlobalConfiguration globalConfig = new GlobalConfiguration();
     private LoadingState loadingState = LoadingState.UNKNOWN; // Must be non-final
     private StaffProtectAPI api;
+
+    /**
+     * Gets a global config,
+     * which is located in <b>plugins/StaffProtect/addons/</b> with name <b>global_config.yml</b><br>
+     * This should be really used instead of normal configuration {@link JavaPlugin} is having as that move
+     * would make next folder and then it could be messy <br>
+     * <br>
+     * Although to add messages to global config,
+     * you can also use the simpler way and create config.yml in your plugin,
+     * and it will be automatically added when config will be reloaded or server will be restarted
+     * @return global configuration
+     */
+    public GlobalConfiguration getGlobalConfig() {
+        return globalConfig;
+    }
 
     /**
      * Gets API
@@ -67,6 +83,16 @@ public abstract class AbstractAddon extends JavaPlugin {
      */
     public LoadingState getLoadingState() {
         return loadingState;
+    }
+
+    @Override
+    public void saveDefaultConfig() {
+        saveConfig();
+    }
+
+    @Override
+    public void saveConfig() {
+        globalConfig.saveConfig();
     }
 
     public enum LoadingState {
