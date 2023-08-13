@@ -6,6 +6,7 @@ plugins {
 
 shadowJar {
     minimize()
+    relocate 'space.arim.morepaperlib', 'net.experience.powered.space.arim.morepaperlib'
     relocate 'net.kyori', 'net.experience.powered.net.kyori'
     relocate 'org.jetbrains', 'net.experience.powered.org.jetbrains'
 }
