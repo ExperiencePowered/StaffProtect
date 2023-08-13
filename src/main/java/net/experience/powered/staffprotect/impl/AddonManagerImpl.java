@@ -56,7 +56,7 @@ public class AddonManagerImpl implements AddonManager {
             final @NotNull AbstractAddon.LoadingState state,
             final @Nullable Runnable runnable) {
         try {
-            Field field = AbstractAddon.class.getDeclaredField("loadingState");
+            final Field field = AbstractAddon.class.getDeclaredField("loadingState");
             field.setAccessible(true);
             field.set(addon, state);
             if (runnable != null) runnable.run();
