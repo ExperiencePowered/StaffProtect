@@ -1,10 +1,11 @@
 package net.experience.powered.staffprotect;
 
 import net.experience.powered.staffprotect.hooks.LuckPermsHook;
+import net.experience.powered.staffprotect.impl.AddonManagerImpl;
 import net.experience.powered.staffprotect.impl.StaffProtectAPIImpl;
+import net.experience.powered.staffprotect.interfaces.Permission;
 import net.experience.powered.staffprotect.listeners.InventoryListener;
 import net.experience.powered.staffprotect.listeners.PlayerListener;
-import net.experience.powered.staffprotect.interfaces.Permission;
 import net.experience.powered.staffprotect.notification.NotificationBus;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.ServicePriority;
@@ -20,6 +21,7 @@ import java.util.UUID;
 
 public final class StaffProtect extends JavaPlugin {
 
+    private StaffProtectAPI api;
     private Permission permission = new Permission() {};
 
     @Override
@@ -31,12 +33,18 @@ public final class StaffProtect extends JavaPlugin {
             this.permission = new LuckPermsHook();
         }
 
-        final var api = getStaffProtectAPI();
+        api = getStaffProtectAPI();
         Bukkit.getServicesManager().register(StaffProtectAPI.class, api, this, ServicePriority.Normal);
+        ((AddonManagerImpl) api.getAddonManager()).enableAddons();
 
         final var pluginManager = Bukkit.getPluginManager();
         pluginManager.registerEvents(new InventoryListener(api), this);
         pluginManager.registerEvents(new PlayerListener(api), this);
+    }
+
+    @Override
+    public void onDisable() {
+        ((AddonManagerImpl) api.getAddonManager()).disableAddons();
     }
 
     @NotNull

@@ -5,6 +5,7 @@ import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -29,10 +30,10 @@ public class NotificationManager {
      * @param component message to send
      */
     public void sendMessage(final @NotNull Component component) {
-        final var audience = BukkitAudiences.create(plugin);
+        final BukkitAudiences audience = BukkitAudiences.create(plugin);
         bus.getSubscribers().forEach(uuid -> {
             // Get player async
-            final var future = CompletableFuture.supplyAsync(() -> Bukkit.getPlayer(uuid));
+            final CompletableFuture<Player> future = CompletableFuture.supplyAsync(() -> Bukkit.getPlayer(uuid));
             future.thenAcceptAsync(player -> {
                 if (player == null) {
                     throw new IllegalStateException("Player is offline, but is still subscribing to notifications");
@@ -49,12 +50,12 @@ public class NotificationManager {
      */
     @Deprecated(forRemoval = true)
     public void sendMessage(final @NotNull String string) {
-        final var audience = BukkitAudiences.create(plugin);
+        final BukkitAudiences audience = BukkitAudiences.create(plugin);
         // Serializes string to component
-        final var component = LegacyComponentSerializer.legacyAmpersand().deserialize(string);
+        final Component component = LegacyComponentSerializer.legacyAmpersand().deserialize(string);
         bus.getSubscribers().forEach(uuid -> {
             // Get player async
-            final var future = CompletableFuture.supplyAsync(() -> Bukkit.getPlayer(uuid));
+            final CompletableFuture<Player> future = CompletableFuture.supplyAsync(() -> Bukkit.getPlayer(uuid));
             future.thenAcceptAsync(player -> {
                 if (player == null) {
                     throw new IllegalStateException("Player is offline, but is still subscribing to notifications");
@@ -70,7 +71,7 @@ public class NotificationManager {
      */
     @Contract(" -> new")
     public static @NotNull NotificationManager getInstance() {
-        final var api = StaffProtectAPI.getInstance();
+        final StaffProtectAPI api = StaffProtectAPI.getInstance();
         return new NotificationManager(api.getPlugin(), api.getNotificationBus());
     }
 }

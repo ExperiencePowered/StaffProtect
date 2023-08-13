@@ -6,6 +6,7 @@ plugins {
 
 shadowJar {
     minimize()
+    relocate 'space.arim.morepaperlib', 'net.experience.powered.space.arim.morepaperlib'
     relocate 'net.kyori', 'net.experience.powered.net.kyori'
     relocate 'org.jetbrains', 'net.experience.powered.org.jetbrains'
 }
@@ -30,7 +31,7 @@ repositories {
         url = "https://oss.sonatype.org/content/groups/public/"
     }
     maven {
-        name = "arim-mvn-lgpl3";
+        name = "arim-mvn-lgpl3"
         url = "https://mvn-repo.arim.space/lesser-gpl3/"
     }
 }
@@ -57,7 +58,7 @@ subprojects {
             url = "https://hub.spigotmc.org/nexus/content/groups/public/"
         }
         maven {
-            name = "arim-mvn-lgpl3";
+            name = "arim-mvn-lgpl3"
             url = "https://mvn-repo.arim.space/lesser-gpl3/"
         }
     }

@@ -1,9 +1,9 @@
 package net.experience.powered.staffprotect;
 
+import net.experience.powered.staffprotect.addons.AddonManager;
 import net.experience.powered.staffprotect.interfaces.Permission;
 import net.experience.powered.staffprotect.notification.NotificationBus;
 import org.bukkit.Bukkit;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.ServicesManager;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -31,10 +31,16 @@ public interface StaffProtectAPI {
     @NotNull NotificationBus getNotificationBus();
 
     /**
-     * Gets plugin instance which loaded this class
+     * Getter for plugin instance which loaded this class
      * @return plugin class
      */
     @NotNull JavaPlugin getPlugin();
+
+    /**
+     * Getter for addon manager which is manager for {@link net.experience.powered.staffprotect.addons.AbstractAddon}
+     * @return addon manager class
+     */
+    @NotNull AddonManager getAddonManager();
 
     /**
      * Gets instance directly, so you don't have to write code for getting instance
