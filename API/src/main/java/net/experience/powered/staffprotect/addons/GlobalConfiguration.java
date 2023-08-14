@@ -17,6 +17,7 @@ public class GlobalConfiguration extends YamlConfiguration {
     public static final File path = new File(StaffProtectAPI.getInstance().getPlugin().getDataFolder() + "addons" + File.separator, "global_config.yml");
 
     public GlobalConfiguration() {
+        saveConfig();
         reloadConfig();
     }
 
