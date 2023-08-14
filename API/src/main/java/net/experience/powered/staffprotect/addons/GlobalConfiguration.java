@@ -27,22 +27,24 @@ public class GlobalConfiguration extends YamlConfiguration {
     public static final File path = new File(addonsFolder, "global_config.yml");
 
     public GlobalConfiguration() {
-        saveConfig();
+        if (!GlobalConfiguration.path.exists()) {
+            saveConfig();
+        }
         reloadConfig();
     }
 
     public void saveConfig() { // Copied from JavaPlugin
-        if (!GlobalConfiguration.path.exists()) {
-           try {
-               save(GlobalConfiguration.path);
-           }
-           catch (IOException e) {
-               throw new RuntimeException(e);
-           }
+        // Has to be sync!
+       try {
+           save(GlobalConfiguration.path);
+       }
+       catch (IOException e) {
+           throw new RuntimeException(e);
         }
     }
 
     public void reloadConfig() { // Copied from JavaPlugin
+        // Has to be sync!
         try {
             load(GlobalConfiguration.path);
         } catch (IOException | InvalidConfigurationException e) {
@@ -77,16 +79,12 @@ public class GlobalConfiguration extends YamlConfiguration {
                     setDefaultString(key, configuration.get(key));
                 }
             }
-            try {
-                save(GlobalConfiguration.path);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+            saveConfig();
         });
         reloadConfig();
     }
 
-    public void setDefaultString(final @NotNull String path, final Object value) {
+    private void setDefaultString(final @NotNull String path, final Object value) {
         if (!contains(path)) {
             set(path, value);
         }
