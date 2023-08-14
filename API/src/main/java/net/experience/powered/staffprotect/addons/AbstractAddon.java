@@ -1,6 +1,7 @@
 package net.experience.powered.staffprotect.addons;
 
 import net.experience.powered.staffprotect.StaffProtectAPI;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -13,7 +14,7 @@ import org.jetbrains.annotations.NotNull;
  */
 public abstract class AbstractAddon extends JavaPlugin {
 
-    private final GlobalConfiguration globalConfig = new GlobalConfiguration();
+    private GlobalConfiguration globalConfig = null;
     private LoadingState loadingState = LoadingState.UNKNOWN; // Must be non-final
     private StaffProtectAPI api;
 
@@ -29,6 +30,12 @@ public abstract class AbstractAddon extends JavaPlugin {
      * @return global configuration
      */
     public GlobalConfiguration getGlobalConfig() {
+        if (!loadingState.equals(LoadingState.ENABLED)) {
+            throw new RuntimeException("Cannot access global configuration until plugin is fully enabled.");
+        }
+        if (globalConfig == null) {
+            globalConfig = new GlobalConfiguration();
+        }
         return globalConfig;
     }
 
@@ -93,6 +100,12 @@ public abstract class AbstractAddon extends JavaPlugin {
     @Override
     public void saveConfig() {
         globalConfig.saveConfig();
+    }
+
+    @NotNull
+    @Override
+    public FileConfiguration getConfig() {
+        return getGlobalConfig();
     }
 
     public enum LoadingState {
