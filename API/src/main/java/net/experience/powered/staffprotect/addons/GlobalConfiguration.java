@@ -58,7 +58,7 @@ public class GlobalConfiguration extends YamlConfiguration {
                 "",
                 "StaffProtect | Global Configuration",
                 "",
-                "This is configuration which will have all",
+                "This is a configuration that will have all",
                 "settings from addons",
                 "",
                 "#############################################"
