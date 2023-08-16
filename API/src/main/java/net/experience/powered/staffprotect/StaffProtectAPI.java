@@ -3,6 +3,7 @@ package net.experience.powered.staffprotect;
 import net.experience.powered.staffprotect.addons.AddonManager;
 import net.experience.powered.staffprotect.interfaces.Permission;
 import net.experience.powered.staffprotect.notification.NotificationBus;
+import net.experience.powered.staffprotect.util.CommandRegisterer;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.ServicesManager;
@@ -41,6 +42,12 @@ public interface StaffProtectAPI {
      * @return addon manager class
      */
     @NotNull AddonManager getAddonManager();
+
+    /**
+     * Getter for command registerer
+     * @return command registerer class
+     */
+    @NotNull CommandRegisterer getCommandManager();
 
     /**
      * Gets instance directly, so you don't have to write code for getting instance
