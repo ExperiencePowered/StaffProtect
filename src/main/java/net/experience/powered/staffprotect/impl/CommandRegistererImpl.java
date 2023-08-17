@@ -14,7 +14,7 @@ public class CommandRegistererImpl implements CommandRegisterer {
 
     private CommandMap commandMap;
 
-    private CommandRegistererImpl(final @NotNull String bukkitName) {
+    public CommandRegistererImpl(final @NotNull String bukkitName) {
         final var api = StaffProtectAPI.getInstance();
         final var paperLib = new MorePaperLib(api.getPlugin());
         switch (bukkitName) {
