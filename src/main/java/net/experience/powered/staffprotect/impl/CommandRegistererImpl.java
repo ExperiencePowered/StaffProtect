@@ -14,8 +14,7 @@ public class CommandRegistererImpl implements CommandRegisterer {
 
     private CommandMap commandMap;
 
-    public CommandRegistererImpl(final @NotNull String bukkitName) {
-        final var api = StaffProtectAPI.getInstance();
+    public CommandRegistererImpl(final @NotNull StaffProtectAPI api, final @NotNull String bukkitName) {
         final var paperLib = new MorePaperLib(api.getPlugin());
         switch (bukkitName) {
             // Changed with MorePaperLib api which ensures backwards compatibility
@@ -31,7 +30,7 @@ public class CommandRegistererImpl implements CommandRegisterer {
                         this.commandMap = (CommandMap) commandMapObject;
                     }
                 } catch (final Exception e) {
-                    new CommandRegistererImpl("Spigot");
+                    new CommandRegistererImpl(api, "Spigot");
                 }
             }
         }

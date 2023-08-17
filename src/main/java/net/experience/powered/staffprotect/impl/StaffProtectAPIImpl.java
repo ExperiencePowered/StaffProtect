@@ -25,7 +25,7 @@ public class StaffProtectAPIImpl implements StaffProtectAPI {
         this.permission = permission;
         this.bus = bus;
         this.addonManager = new AddonManagerImpl(this);
-        this.commandRegisterer = new CommandRegistererImpl(Bukkit.getName());
+        this.commandRegisterer = new CommandRegistererImpl(this, Bukkit.getName());
     }
 
 
