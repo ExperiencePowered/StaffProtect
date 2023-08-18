@@ -69,7 +69,7 @@ public class GlobalConfiguration extends YamlConfiguration {
         options().parseComments(true);
 
         StaffProtectAPI.getInstance().getAddonManager().getAddons().forEach(addon -> {
-            final InputStream configStream = addon.getResource("config.yml");
+            final InputStream configStream = addon.getClassLoader().getResourceAsStream("config.yml");
             if (configStream == null) {
                 return;
             }

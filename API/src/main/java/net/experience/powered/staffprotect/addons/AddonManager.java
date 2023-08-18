@@ -2,9 +2,24 @@ package net.experience.powered.staffprotect.addons;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Set;
 
 public interface AddonManager {
+
+    /**
+     * Attempts to load addon
+     * @param file file to load
+     * @return new instance
+     */
+    AbstractAddon load(final @NotNull File file) throws Exception;
+
+    /**
+     * Attempts to unload addon
+     * @param addon addon to unload
+     */
+    void unload(final @NotNull AbstractAddon addon) throws IOException;
 
     /**
      * Register an addon
@@ -22,7 +37,7 @@ public interface AddonManager {
      * Disables an addon
      * @param addon addon to disable
      */
-    void disable(final @NotNull AbstractAddon addon);
+    void disable(final @NotNull AbstractAddon addon) throws IOException;
 
     /**
      * Enables an addon
