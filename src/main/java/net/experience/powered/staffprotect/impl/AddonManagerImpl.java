@@ -10,12 +10,14 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.*;
+import java.util.logging.Logger;
 
 public class AddonManagerImpl implements AddonManager {
 
@@ -36,8 +38,10 @@ public class AddonManagerImpl implements AddonManager {
 
         Arrays.stream(Objects.requireNonNull(addonFolder.listFiles())).filter(File::isFile).forEach(file -> {
             try {
-                final AbstractAddon addon = load(file);
-                addons.put(addon, (URLClassLoader) addon.getClass().getClassLoader());
+                if (extractExtension(file).equals("jar")) {
+                    final AbstractAddon addon = load(file);
+                    addons.put(addon, (URLClassLoader) addon.getClass().getClassLoader());
+                }
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -57,27 +61,39 @@ public class AddonManagerImpl implements AddonManager {
         }
     }
 
+    public String extractExtension(final @NotNull File file) {
+        final String fileName = file.getName();
+        int index = fileName.lastIndexOf('.');
+        if (index > 0) {
+            return fileName.substring(index+1);
+        }
+        return "unknown";
+    }
+
     @Override
     public AbstractAddon load(final @NotNull File file) throws Exception {
-        final var url = file.toURI().toURL();
-        final var urlArray = new URL[]{url};
-        final var parentClassLoader = api.getPlugin().getClass().getClassLoader();
+        if (!extractExtension(file).equals("jar")) {
+            return null;
+        }
+        final URL url = file.toURI().toURL();
+        final URL[] urlArray = new URL[]{url};
+        final ClassLoader parentClassLoader = api.getPlugin().getClass().getClassLoader();
 
         final Class<?> clazz;
         final AddonFile addonFile;
 
         try (URLClassLoader classLoader = new URLClassLoader(urlArray, parentClassLoader);
-             final var inputStream = classLoader.getResourceAsStream("addon.yml")) {
+             final InputStream inputStream = classLoader.getResourceAsStream("addon.yml")) {
             if (inputStream == null) {
                 throw new IllegalStateException("Couldn't find addon.yml for constructor " + file.getName());
             }
-            final var addonYml = YamlConfiguration.loadConfiguration(new InputStreamReader(inputStream));
-            final var mainClass = addonYml.getString("main");
-            var name = addonYml.getString("name");
-            var version = addonYml.getString("version");
-            var author = addonYml.getString("author");
+            final YamlConfiguration addonYml = YamlConfiguration.loadConfiguration(new InputStreamReader(inputStream));
+            final String mainClass = addonYml.getString("main");
+            String name = addonYml.getString("name");
+            String version = addonYml.getString("version");
+            String author = addonYml.getString("author");
 
-            final var logger = api.getPlugin().getLogger();
+            final Logger logger = api.getPlugin().getLogger();
             if (mainClass == null) {
                 throw new IllegalStateException("Addon " + file.getName() + " does not have main class in addon.yml.");
             }
