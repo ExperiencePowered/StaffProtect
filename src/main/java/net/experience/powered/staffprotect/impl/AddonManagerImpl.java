@@ -105,9 +105,10 @@ public class AddonManagerImpl implements AddonManager {
             }
             inputStream.close();
 
-            final Constructor<?> constructor = clazz.getDeclaredConstructor(StaffProtectAPI.class, AbstractAddon.LoadingState.class, AddonFile.class, ClassLoader.class);
+            final Constructor<?> constructor = clazz.getDeclaredConstructor();
             constructor.setAccessible(true);
-            final AbstractAddon addon = (AbstractAddon) constructor.newInstance(api, null, addonFile, classLoader);
+            final AbstractAddon addon = (AbstractAddon) constructor.newInstance();
+            addon.init(api, AbstractAddon.LoadingState.UNKNOWN, addonFile);
             register(addon);
             addon.onLoad();
             return addon;
@@ -126,21 +127,21 @@ public class AddonManagerImpl implements AddonManager {
     @Override
     public void register(final @NotNull AbstractAddon addon) {
         if (!addons.containsKey(addon)) {
-            addon.setLoadingState(AbstractAddon.LoadingState.REGISTERED);
+            addon.setLoadingState(AddonManagerImpl.class, AbstractAddon.LoadingState.REGISTERED);
         }
     }
 
     @Override
     public void unregister(final @NotNull AbstractAddon addon) {
         if (addons.containsKey(addon)) {
-            addon.setLoadingState(AbstractAddon.LoadingState.UNKNOWN);
+            addon.setLoadingState(AddonManagerImpl.class, AbstractAddon.LoadingState.UNKNOWN);
         }
     }
 
     @Override
     public void disable(final @NotNull AbstractAddon addon) throws IOException {
         unregister(addon);
-        addon.setLoadingState(AbstractAddon.LoadingState.UNKNOWN);
+        addon.setLoadingState(AddonManagerImpl.class, AbstractAddon.LoadingState.UNKNOWN);
         addon.onDisable();
         unload(addon);
     }
@@ -152,7 +153,7 @@ public class AddonManagerImpl implements AddonManager {
             this may happen only as a result by playing with reflections */
             throw new IllegalStateException("Tried to enable addon while not being registered.");
         }
-        addon.setLoadingState(AbstractAddon.LoadingState.ENABLED);
+        addon.setLoadingState(AddonManagerImpl.class, AbstractAddon.LoadingState.ENABLED);
         addon.onEnable();
     }
 

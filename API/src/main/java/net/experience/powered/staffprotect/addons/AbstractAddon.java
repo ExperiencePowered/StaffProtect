@@ -12,6 +12,7 @@ import org.jetbrains.annotations.Nullable;
  */
 public abstract class AbstractAddon {
 
+    private boolean init = false;
     private StaffProtectAPI api;
     private AddonFile addonFile;
     private GlobalConfiguration globalConfig;
@@ -20,10 +21,14 @@ public abstract class AbstractAddon {
     public AbstractAddon() {
     }
 
-    private AbstractAddon(final @NotNull StaffProtectAPI api,
-                          final @Nullable LoadingState loadingState,
-                          final @NotNull AddonFile addonFile) {
-        this.loadingState = loadingState == null ? LoadingState.UNKNOWN : loadingState;
+    final public void init(final @NotNull StaffProtectAPI api,
+                        final @Nullable AbstractAddon.LoadingState loadingState,
+                        final @NotNull AddonFile addonFile) {
+        if (init) {
+            return;
+        }
+        this.init = true;
+        this.loadingState = loadingState == null ? AbstractAddon.LoadingState.UNKNOWN : loadingState;
         this.api = api;
         this.globalConfig = new GlobalConfiguration();
         this.addonFile = addonFile;
@@ -37,8 +42,8 @@ public abstract class AbstractAddon {
      * Sets a loading state
      * @param loadingState loading state
      */
-    public void setLoadingState(final @NotNull LoadingState loadingState) {
-        if (!getClass().getClassLoader().equals(api.getPlugin().getClass().getClassLoader())) {
+    public void setLoadingState(final @NotNull Class<?> access, final @NotNull LoadingState loadingState) {
+        if (!access.getClassLoader().equals(api.getPlugin().getClass().getClassLoader())) {
             throw new IllegalStateException("Trying to set loading state with different class loader.");
         }
         this.loadingState = loadingState;
