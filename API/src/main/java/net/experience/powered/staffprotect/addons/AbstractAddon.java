@@ -1,7 +1,6 @@
 package net.experience.powered.staffprotect.addons;
 
 import net.experience.powered.staffprotect.StaffProtectAPI;
-import net.experience.powered.staffprotect.util.ListenerManager;
 import org.bukkit.Bukkit;
 import org.bukkit.event.Listener;
 import org.jetbrains.annotations.NotNull;
@@ -11,7 +10,7 @@ import org.jetbrains.annotations.Nullable;
  * Addon which is in addon folder
  *
  */
-public abstract class AbstractAddon implements ListenerManager {
+public abstract class AbstractAddon {
 
     private final StaffProtectAPI api;
     private final AddonFile addonFile;
@@ -27,7 +26,6 @@ public abstract class AbstractAddon implements ListenerManager {
         this.addonFile = addonFile;
     }
 
-    @Override
     public void registerListener(final @NotNull Listener listener) {
         Bukkit.getPluginManager().registerEvents(listener, api.getPlugin());
     }
