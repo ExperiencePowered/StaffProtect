@@ -1,6 +1,9 @@
 package net.experience.powered.staffprotect.addons;
 
 import net.experience.powered.staffprotect.StaffProtectAPI;
+import net.experience.powered.staffprotect.util.ListenerManager;
+import org.bukkit.Bukkit;
+import org.bukkit.event.Listener;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -8,7 +11,7 @@ import org.jetbrains.annotations.Nullable;
  * Addon which is in addon folder
  *
  */
-public abstract class AbstractAddon {
+public abstract class AbstractAddon implements ListenerManager {
 
     private final StaffProtectAPI api;
     private final AddonFile addonFile;
@@ -24,11 +27,16 @@ public abstract class AbstractAddon {
         this.addonFile = addonFile;
     }
 
+    @Override
+    public void registerListener(final @NotNull Listener listener) {
+        Bukkit.getPluginManager().registerEvents(listener, api.getPlugin());
+    }
+
     /**
      * Sets a loading state
      * @param loadingState loading state
      */
-    public void setLoadingState(LoadingState loadingState) {
+    public void setLoadingState(final @NotNull LoadingState loadingState) {
         if (!getClass().getClassLoader().equals(api.getPlugin().getClass().getClassLoader())) {
             throw new IllegalStateException("Trying to set loading state with different class loader.");
         }
