@@ -19,14 +19,13 @@ import java.util.*;
 
 public class AddonManagerImpl implements AddonManager {
 
-    private final GlobalConfiguration globalConfiguration;
     private final StaffProtectAPI api;
     private final HashMap<AbstractAddon, URLClassLoader> addons;
+    private GlobalConfiguration globalConfiguration;
 
     public AddonManagerImpl(final @NotNull StaffProtectAPI api) {
         this.api = api;
         this.addons = new HashMap<>();
-        this.globalConfiguration = new GlobalConfiguration();
     }
 
     public void enableAddons() {
@@ -43,6 +42,7 @@ public class AddonManagerImpl implements AddonManager {
                 throw new RuntimeException(e);
             }
         });
+        globalConfiguration = new GlobalConfiguration();
         globalConfiguration.saveDefaultConfig();
         addons.forEach((addon, classLoader) -> enable(addon)); // Enables addons
     }
@@ -69,7 +69,7 @@ public class AddonManagerImpl implements AddonManager {
         try (URLClassLoader classLoader = new URLClassLoader(urlArray, parentClassLoader);
              final var inputStream = classLoader.getResourceAsStream("addon.yml")) {
             if (inputStream == null) {
-                throw new IllegalStateException("Couldn't find constructor.yml for constructor " + file.getName());
+                throw new IllegalStateException("Couldn't find addon.yml for constructor " + file.getName());
             }
             final var addonYml = YamlConfiguration.loadConfiguration(new InputStreamReader(inputStream));
             final var mainClass = addonYml.getString("main");
@@ -79,11 +79,11 @@ public class AddonManagerImpl implements AddonManager {
 
             final var logger = api.getPlugin().getLogger();
             if (mainClass == null) {
-                throw new IllegalStateException("Addon " + file.getName() + " does not have main class in constructor.yml.");
+                throw new IllegalStateException("Addon " + file.getName() + " does not have main class in addon.yml.");
             }
 
             if (name == null) {
-                logger.warning("Addon " + file.getName() + " does not have name in constructor.yml, we will use file's name.");
+                logger.warning("Addon " + file.getName() + " does not have name in addon.yml, we will use file's name.");
                 name = file.getName();
             }
 
