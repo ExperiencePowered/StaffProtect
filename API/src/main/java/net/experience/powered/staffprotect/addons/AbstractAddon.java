@@ -12,10 +12,13 @@ import org.jetbrains.annotations.Nullable;
  */
 public abstract class AbstractAddon {
 
-    private final StaffProtectAPI api;
-    private final AddonFile addonFile;
+    private StaffProtectAPI api;
+    private AddonFile addonFile;
     private GlobalConfiguration globalConfig;
     private LoadingState loadingState;
+
+    public AbstractAddon() {
+    }
 
     private AbstractAddon(final @NotNull StaffProtectAPI api,
                           final @Nullable LoadingState loadingState,
