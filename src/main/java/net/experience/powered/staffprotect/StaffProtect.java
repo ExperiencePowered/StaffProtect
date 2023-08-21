@@ -21,11 +21,23 @@ import java.util.UUID;
 
 public final class StaffProtect extends JavaPlugin {
 
+    private VersionController versionController;
     private StaffProtectAPI api;
     private Permission permission = new Permission() {};
 
     @Override
     public void onEnable() {
+        this.versionController = new VersionController(getDataFolder());
+
+        String info = "Enabling StaffProtect v" +
+                versionController.getVersion() +
+                " (Git: " +
+                versionController.getGitHash() +
+                ", branch " +
+                versionController.getGitBranchName() +
+                ")";
+        getLogger().info(info);
+
         if (!new File(getDataFolder(), "config.yml").exists()) {
             saveResource("config.yml", false);
         }
@@ -44,6 +56,7 @@ public final class StaffProtect extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        if (api == null) return;
         ((AddonManagerImpl) api.getAddonManager()).disableAddons();
     }
 
