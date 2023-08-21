@@ -14,7 +14,9 @@ import java.util.concurrent.CompletableFuture;
 
 /**
  * Efficient notification manager through you can send a message
+ * @deprecated since this is an inefficient way of sending components, use {@link Sender} instead
  */
+@Deprecated(forRemoval = true)
 public class NotificationManager {
 
     private final NotificationBus bus;
