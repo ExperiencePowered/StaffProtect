@@ -8,6 +8,7 @@ plugins {
 shadowJar {
     minimize()
     relocate 'space.arim.morepaperlib', 'net.experience.powered.staffprotect.space.arim.morepaperlib'
+    dependsOn("createProperties")
 }
 
 tasks {
@@ -92,7 +93,6 @@ processResources {
 }
 
 tasks.register('createProperties') {
-    onlyIf { tasks.named('shadowJar') != null }
     doLast {
         def details = versionDetails()
         new File("$buildDir/resources/main/version.properties").withWriter { w ->
@@ -112,8 +112,4 @@ tasks.register('createProperties') {
             into "bin/main/"
         }
     }
-}
-
-classes {
-    dependsOn createProperties
 }
