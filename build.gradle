@@ -1,4 +1,5 @@
 plugins {
+    id 'com.palantir.git-version' version '3.0.0'
     id 'xyz.jpenilla.run-paper' version '2.1.0'
     id 'com.github.johnrengelman.shadow' version '8.1.1'
     id 'java'
@@ -7,7 +8,6 @@ plugins {
 shadowJar {
     minimize()
     relocate 'space.arim.morepaperlib', 'net.experience.powered.staffprotect.space.arim.morepaperlib'
-    relocate 'net.kyori', 'net.experience.powered.staffprotect.net.kyori'
 }
 
 tasks {
@@ -61,7 +61,6 @@ subprojects {
     dependencies {
         implementation("net.kyori:adventure-api:4.3.0")
         implementation("net.kyori:adventure-platform-bukkit:4.3.0")
-        implementation("net.kyori:adventure-text-serializer-legacy:4.13.1")
         implementation("org.jetbrains:annotations:24.0.0")
         compileOnly("org.spigotmc:spigot-api:1.20-R0.1-SNAPSHOT")
     }
@@ -90,4 +89,30 @@ processResources {
     filesMatching('plugin.yml') {
         expand props
     }
+}
+
+tasks.register('createProperties') {
+    doLast {
+        def details = versionDetails()
+        new File("$buildDir/resources/main/version.properties").withWriter { w ->
+            Properties p = new Properties()
+            p['version'] = project.version.toString()
+            p['gitLastTag'] = details.lastTag
+            p['gitCommitDistance'] = details.commitDistance.toString()
+            p['gitHash'] = details.gitHash.toString()
+            p['gitHashFull'] = details.gitHashFull.toString() // full 40-character Git commit hash
+            p['gitBranchName'] = details.branchName // is null if the repository in detached HEAD mode
+            p['gitIsCleanTag'] = details.isCleanTag.toString()
+            p.store w, null
+        }
+        // copy needed, otherwise the bean VersionController can't load the file at startup when running complete-app tests.
+        copy {
+            from "$buildDir/resources/main/version.properties"
+            into "bin/main/"
+        }
+    }
+}
+
+classes {
+    dependsOn createProperties
 }
