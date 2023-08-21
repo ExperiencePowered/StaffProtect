@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.*;
@@ -21,12 +21,14 @@ import java.util.logging.Logger;
 
 public class AddonManagerImpl implements AddonManager {
 
+    private final Logger logger;
     private final StaffProtectAPI api;
     private final HashMap<AbstractAddon, URLClassLoader> addons;
     private GlobalConfiguration globalConfiguration;
 
     public AddonManagerImpl(final @NotNull StaffProtectAPI api) {
         this.api = api;
+        this.logger = api.getPlugin().getLogger();
         this.addons = new HashMap<>();
     }
 
@@ -40,7 +42,7 @@ public class AddonManagerImpl implements AddonManager {
             try {
                 if (extractExtension(file).equals("jar")) {
                     final AbstractAddon addon = load(file);
-                    addons.put(addon, (URLClassLoader) addon.getClass().getClassLoader());
+                    addons.put(addon, addon.getClassLoader());
                 }
             } catch (Exception e) {
                 throw new RuntimeException(e);
@@ -54,7 +56,9 @@ public class AddonManagerImpl implements AddonManager {
     public void disableAddons() {
         for (final Map.Entry<AbstractAddon, URLClassLoader> entry : addons.entrySet()) {
             try {
-                disable(entry.getKey());
+                final AbstractAddon addon = entry.getKey();
+                disable(addon);
+                unload(addon);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -81,9 +85,9 @@ public class AddonManagerImpl implements AddonManager {
 
         final Class<?> clazz;
         final AddonFile addonFile;
+        final URLClassLoader classLoader = new URLClassLoader(urlArray, parentClassLoader);
 
-        try (URLClassLoader classLoader = new URLClassLoader(urlArray, parentClassLoader);
-             final InputStream inputStream = classLoader.getResourceAsStream("addon.yml")) {
+        try (final InputStream inputStream = classLoader.getResourceAsStream("addon.yml")) {
             if (inputStream == null) {
                 throw new IllegalStateException("Couldn't find addon.yml for constructor " + file.getName());
             }
@@ -93,7 +97,6 @@ public class AddonManagerImpl implements AddonManager {
             String version = addonYml.getString("version");
             String author = addonYml.getString("author");
 
-            final Logger logger = api.getPlugin().getLogger();
             if (mainClass == null) {
                 throw new IllegalStateException("Addon " + file.getName() + " does not have main class in addon.yml.");
             }
@@ -114,36 +117,36 @@ public class AddonManagerImpl implements AddonManager {
                 author = "Anonymous";
             }
             addonFile = AddonFileImpl.getInstance(mainClass, name, version, author);
-
-            clazz = classLoader.loadClass(mainClass);
-            if (!AbstractAddon.class.isAssignableFrom(clazz)) {
-                throw new IllegalStateException("Tried to initiate addon " + name + " which is not extending AbstractAddon.");
-            }
-            inputStream.close();
-
-            final Constructor<?> constructor = clazz.getDeclaredConstructor();
-            constructor.setAccessible(true);
-            final AbstractAddon addon = (AbstractAddon) constructor.newInstance();
-            addon.init(api, AbstractAddon.LoadingState.UNKNOWN, addonFile);
-            register(addon);
-            addon.onLoad();
-            return addon;
+            clazz = classLoader.loadClass(addonFile.mainClass());
         }
-        catch (InstantiationException | InvocationTargetException | IllegalAccessException e) {
-            throw new RuntimeException(e);
+        if (!AbstractAddon.class.isAssignableFrom(clazz)) {
+            throw new IllegalStateException("Tried to initiate addon " + addonFile.pluginName() + " which is not extending AbstractAddon.");
         }
+
+        final Constructor<?> constructor = clazz.getDeclaredConstructor();
+        final AbstractAddon addon = (AbstractAddon) constructor.newInstance();
+        final Method method = AbstractAddon.class.getDeclaredMethod("init", StaffProtectAPI.class, AddonFile.class, AbstractAddon.LoadingState.class, URLClassLoader.class);
+        method.setAccessible(true);
+        method.invoke(addon, api, addonFile, AbstractAddon.LoadingState.UNKNOWN, classLoader);
+
+        this.register(addon);
+        addon.onLoad();
+        logger.info("Loaded addon " + addon + " v" + addon.getAddonFile().pluginVersion());
+        return addon;
     }
 
     @Override
     public void unload(final @NotNull AbstractAddon addon) throws IOException {
         final URLClassLoader classLoader = addons.get(addon);
         classLoader.close();
+        logger.info("Unloaded addon " + addon + " v" + addon.getAddonFile().pluginVersion());
     }
 
     @Override
     public void register(final @NotNull AbstractAddon addon) {
         if (!addons.containsKey(addon)) {
             addon.setLoadingState(AddonManagerImpl.class, AbstractAddon.LoadingState.REGISTERED);
+            logger.info("Registered addon " + addon + " v" + addon.getAddonFile().pluginVersion());
         }
     }
 
@@ -151,6 +154,7 @@ public class AddonManagerImpl implements AddonManager {
     public void unregister(final @NotNull AbstractAddon addon) {
         if (addons.containsKey(addon)) {
             addon.setLoadingState(AddonManagerImpl.class, AbstractAddon.LoadingState.UNKNOWN);
+            logger.info("Unregistered addon " + addon + " v" + addon.getAddonFile().pluginVersion());
         }
     }
 
@@ -159,7 +163,7 @@ public class AddonManagerImpl implements AddonManager {
         unregister(addon);
         addon.setLoadingState(AddonManagerImpl.class, AbstractAddon.LoadingState.UNKNOWN);
         addon.onDisable();
-        unload(addon);
+        logger.info("Disabled addon " + addon + " v" + addon.getAddonFile().pluginVersion());
     }
 
     @Override
@@ -171,6 +175,7 @@ public class AddonManagerImpl implements AddonManager {
         }
         addon.setLoadingState(AddonManagerImpl.class, AbstractAddon.LoadingState.ENABLED);
         addon.onEnable();
+        logger.info("Enabled addon " + addon + " v" + addon.getAddonFile().pluginVersion());
     }
 
     @Override
