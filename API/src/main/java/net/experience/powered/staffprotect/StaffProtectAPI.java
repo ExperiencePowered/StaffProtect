@@ -3,6 +3,7 @@ package net.experience.powered.staffprotect;
 import net.experience.powered.staffprotect.addons.AddonManager;
 import net.experience.powered.staffprotect.interfaces.Permission;
 import net.experience.powered.staffprotect.notification.NotificationBus;
+import net.experience.powered.staffprotect.notification.Sender;
 import net.experience.powered.staffprotect.util.CommandRegisterer;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.RegisteredServiceProvider;
@@ -48,6 +49,12 @@ public interface StaffProtectAPI {
      * @return command registerer class
      */
     @NotNull CommandRegisterer getCommandManager();
+
+    /**
+     * Returns new instance of class {@link Sender}
+     * @return sender class for sending messages to all players
+     */
+    @NotNull Sender getSenderInstance();
 
     /**
      * Gets instance directly, so you don't have to write code for getting instance
