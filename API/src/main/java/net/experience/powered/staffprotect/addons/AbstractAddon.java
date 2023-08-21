@@ -6,13 +6,15 @@ import org.bukkit.event.Listener;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.net.URLClassLoader;
+
 /**
  * Addon which is in addon folder
  *
  */
 public abstract class AbstractAddon {
 
-    private boolean init = false;
+    private URLClassLoader classLoader;
     private StaffProtectAPI api;
     private AddonFile addonFile;
     private GlobalConfiguration globalConfig;
@@ -21,17 +23,15 @@ public abstract class AbstractAddon {
     public AbstractAddon() {
     }
 
-    final public void init(final @NotNull StaffProtectAPI api,
-                        final @Nullable AbstractAddon.LoadingState loadingState,
-                        final @NotNull AddonFile addonFile) {
-        if (init) {
-            return;
-        }
-        this.init = true;
+    private void init(final @NotNull StaffProtectAPI api,
+                            final @NotNull AddonFile addonFile,
+                            final @Nullable LoadingState loadingState,
+                            final @NotNull URLClassLoader classLoader) {
         this.loadingState = loadingState == null ? AbstractAddon.LoadingState.UNKNOWN : loadingState;
         this.api = api;
         this.globalConfig = new GlobalConfiguration();
         this.addonFile = addonFile;
+        this.classLoader = classLoader;
     }
 
     public void registerListener(final @NotNull Listener listener) {
@@ -47,6 +47,14 @@ public abstract class AbstractAddon {
             throw new IllegalStateException("Trying to set loading state with different class loader.");
         }
         this.loadingState = loadingState;
+    }
+
+    /**
+     * Gets a class loader
+     * @return class loader
+     */
+    public URLClassLoader getClassLoader() {
+        return classLoader;
     }
 
     /**
@@ -112,6 +120,11 @@ public abstract class AbstractAddon {
      */
     public LoadingState getLoadingState() {
         return loadingState;
+    }
+
+    @Override
+    public final @NotNull String toString() {
+        return addonFile.pluginName();
     }
 
     public enum LoadingState {
