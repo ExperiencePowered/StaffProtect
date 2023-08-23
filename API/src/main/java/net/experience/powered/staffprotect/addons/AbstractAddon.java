@@ -1,28 +1,73 @@
 package net.experience.powered.staffprotect.addons;
 
 import net.experience.powered.staffprotect.StaffProtectAPI;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.plugin.java.JavaPlugin;
-import org.jetbrains.annotations.ApiStatus;
+import org.bukkit.Bukkit;
+import org.bukkit.event.Listener;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.net.URLClassLoader;
 
 /**
- * Addons which are in addon folder
- * Every method like {@link AbstractAddon#onRegister()} are called after the loading state is set and every logic is run
- * Method from {@link JavaPlugin#onLoad()} is called first, then is called {@link AbstractAddon#onRegister()} and lastly {@link JavaPlugin#onEnable()}
+ * Addon which is in addon folder
  *
  */
-public abstract class AbstractAddon extends JavaPlugin {
+public abstract class AbstractAddon {
 
-    private GlobalConfiguration globalConfig = null;
-    private LoadingState loadingState = LoadingState.UNKNOWN; // Must be non-final
+    private URLClassLoader classLoader;
     private StaffProtectAPI api;
+    private AddonFile addonFile;
+    private GlobalConfiguration globalConfig;
+    private LoadingState loadingState;
+
+    public AbstractAddon() {
+    }
+
+    private void init(final @NotNull StaffProtectAPI api,
+                            final @NotNull AddonFile addonFile,
+                            final @Nullable LoadingState loadingState,
+                            final @NotNull URLClassLoader classLoader) {
+        this.loadingState = loadingState == null ? AbstractAddon.LoadingState.UNKNOWN : loadingState;
+        this.api = api;
+        this.globalConfig = new GlobalConfiguration();
+        this.addonFile = addonFile;
+        this.classLoader = classLoader;
+    }
+
+    public void registerListener(final @NotNull Listener listener) {
+        Bukkit.getPluginManager().registerEvents(listener, api.getPlugin());
+    }
+
+    /**
+     * Sets a loading state
+     * @param loadingState loading state
+     */
+    public void setLoadingState(final @NotNull Class<?> access, final @NotNull LoadingState loadingState) {
+        if (!access.getClassLoader().equals(api.getPlugin().getClass().getClassLoader())) {
+            throw new IllegalStateException("Trying to set loading state with different class loader.");
+        }
+        this.loadingState = loadingState;
+    }
+
+    /**
+     * Gets a class loader
+     * @return class loader
+     */
+    public URLClassLoader getClassLoader() {
+        return classLoader;
+    }
+
+    /**
+     * Gets an addon file
+     * @return addon file
+     */
+    public AddonFile getAddonFile() {
+        return addonFile;
+    }
 
     /**
      * Gets a global config,
      * which is located in <b>plugins/StaffProtect/addons/</b> with name <b>global_config.yml</b><br>
-     * This should be really used instead of normal configuration {@link JavaPlugin} is having as that move
-     * would make next folder and then it could be messy <br>
      * <br>
      * Although to add messages to global config,
      * you can also use the simpler way and create config.yml in your plugin,
@@ -48,21 +93,6 @@ public abstract class AbstractAddon extends JavaPlugin {
     }
 
     /**
-     * Sets API
-     * @param api new api
-     * @throws RuntimeException thrown when trying to set api while not being enabled, this should happen only when someone else than manager is interacting with this
-     */
-    @ApiStatus.Internal
-    public void setAPI(final @NotNull StaffProtectAPI api) throws RuntimeException {
-        if (loadingState != LoadingState.ENABLED) {
-            throw new RuntimeException("Tried to set API while not being enabled.");
-        }
-        if (this.api == null) {
-            this.api = api;
-        }
-    }
-
-    /**
      * Gets whether plugin should be shown in a list of addons <br>
      * It is good to return false in case  <br>
      * If you want to change value, override it
@@ -72,16 +102,16 @@ public abstract class AbstractAddon extends JavaPlugin {
         return true;
     }
 
-    /**
-     * Called when addon is registered
-     */
-    public void onRegister() {
+    public void onLoad() {
     }
 
-    /**
-     * Called when addon is unregistered
-     */
-    public void onUnregister() {
+    public void onUnload() {
+    }
+
+    public void onEnable() {
+    }
+
+    public void onDisable() {
     }
 
     /**
@@ -93,19 +123,8 @@ public abstract class AbstractAddon extends JavaPlugin {
     }
 
     @Override
-    public void saveDefaultConfig() {
-        saveConfig();
-    }
-
-    @Override
-    public void saveConfig() {
-        globalConfig.saveConfig();
-    }
-
-    @NotNull
-    @Override
-    public FileConfiguration getConfig() {
-        return getGlobalConfig();
+    public final @NotNull String toString() {
+        return addonFile.pluginName();
     }
 
     public enum LoadingState {

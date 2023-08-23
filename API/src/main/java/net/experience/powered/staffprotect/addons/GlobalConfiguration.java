@@ -58,7 +58,7 @@ public class GlobalConfiguration extends YamlConfiguration {
                 "",
                 "StaffProtect | Global Configuration",
                 "",
-                "This is configuration which will have all",
+                "This is a configuration that will have all",
                 "settings from addons",
                 "",
                 "#############################################"
@@ -69,15 +69,19 @@ public class GlobalConfiguration extends YamlConfiguration {
         options().parseComments(true);
 
         StaffProtectAPI.getInstance().getAddonManager().getAddons().forEach(addon -> {
-            final InputStream configStream = addon.getResource("config.yml");
-            if (configStream == null) {
-                return;
-            }
-            final Configuration configuration = YamlConfiguration.loadConfiguration(new InputStreamReader(configStream, StandardCharsets.UTF_8));
-            for (final String key : configuration.getKeys(true)) {
-                if (!configuration.isConfigurationSection(key)) {
-                    setDefaultString(key, configuration.get(key));
+            try (final InputStream configStream = addon.getClass().getClassLoader().getResourceAsStream("config.yml")) {
+                if (configStream == null) {
+                    return;
                 }
+                final Configuration configuration = YamlConfiguration.loadConfiguration(new InputStreamReader(configStream, StandardCharsets.UTF_8));
+                for (final String key : configuration.getKeys(true)) {
+                    if (!configuration.isConfigurationSection(key)) {
+                        setDefaultString(key, configuration.get(key));
+                    }
+                }
+            }
+            catch (IOException e) {
+                throw new RuntimeException(e);
             }
             saveConfig();
         });

@@ -4,11 +4,16 @@ import net.experience.powered.staffprotect.StaffProtectAPI;
 import net.experience.powered.staffprotect.addons.AddonManager;
 import net.experience.powered.staffprotect.interfaces.Permission;
 import net.experience.powered.staffprotect.notification.NotificationBus;
+import net.experience.powered.staffprotect.notification.Sender;
+import net.experience.powered.staffprotect.util.CommandRegisterer;
+import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 
 public class StaffProtectAPIImpl implements StaffProtectAPI {
 
+    private final Sender sender;
+    private final CommandRegisterer commandRegisterer;
     private final AddonManager addonManager;
     private final JavaPlugin plugin;
     private final Permission permission;
@@ -22,6 +27,8 @@ public class StaffProtectAPIImpl implements StaffProtectAPI {
         this.permission = permission;
         this.bus = bus;
         this.addonManager = new AddonManagerImpl(this);
+        this.commandRegisterer = new CommandRegistererImpl(this, Bukkit.getName());
+        this.sender = new SenderImpl(this);
     }
 
 
@@ -43,5 +50,15 @@ public class StaffProtectAPIImpl implements StaffProtectAPI {
     @Override
     public @NotNull AddonManager getAddonManager() {
         return addonManager;
+    }
+
+    @Override
+    public @NotNull CommandRegisterer getCommandManager() {
+        return commandRegisterer;
+    }
+
+    @Override
+    public @NotNull Sender getSenderInstance() {
+        return sender;
     }
 }
