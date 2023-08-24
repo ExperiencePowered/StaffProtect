@@ -29,9 +29,7 @@ public final class StaffProtect extends JavaPlugin {
     public void onEnable() {
         this.versionController = new VersionController(getDataFolder());
 
-        String info = "Enabling StaffProtect v" +
-                versionController.getVersion() +
-                " (Git: " +
+        String info = " (Git: " +
                 versionController.getGitHash() +
                 ", branch " +
                 versionController.getGitBranchName() +
@@ -52,6 +50,9 @@ public final class StaffProtect extends JavaPlugin {
         final var pluginManager = Bukkit.getPluginManager();
         pluginManager.registerEvents(new InventoryListener(api), this);
         pluginManager.registerEvents(new PlayerListener(api), this);
+
+        final Metrics metrics = new Metrics(this, 19629);
+        metrics.addCustomChart(new Metrics.SingleLineChart("amount_of_addons", () -> api.getAddonManager().getAddons().size()));
     }
 
     @Override
