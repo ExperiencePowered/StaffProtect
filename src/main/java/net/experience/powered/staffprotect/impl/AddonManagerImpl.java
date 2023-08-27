@@ -43,6 +43,7 @@ public class AddonManagerImpl implements AddonManager {
                 if (extractExtension(file).equals("jar")) {
                     final AbstractAddon addon = load(file);
                     addons.put(addon, addon.getClassLoader());
+                    register(addon);
                 }
             } catch (Exception e) {
                 throw new RuntimeException(e);
@@ -57,6 +58,7 @@ public class AddonManagerImpl implements AddonManager {
         for (final Map.Entry<AbstractAddon, URLClassLoader> entry : addons.entrySet()) {
             try {
                 final AbstractAddon addon = entry.getKey();
+                unregister(addon);
                 disable(addon);
                 unload(addon);
             } catch (IOException e) {
@@ -160,7 +162,6 @@ public class AddonManagerImpl implements AddonManager {
 
     @Override
     public void disable(final @NotNull AbstractAddon addon) throws IOException {
-        unregister(addon);
         addon.setLoadingState(AddonManagerImpl.class, AbstractAddon.LoadingState.UNKNOWN);
         addon.onDisable();
         logger.info("Disabled addon " + addon + " v" + addon.getAddonFile().pluginVersion());
@@ -168,11 +169,6 @@ public class AddonManagerImpl implements AddonManager {
 
     @Override
     public void enable(final @NotNull AbstractAddon addon) {
-        if (!addons.containsKey(addon)) {
-            /* Addon should always be registered before enabling,
-            this may happen only as a result by playing with reflections */
-            throw new IllegalStateException("Tried to enable addon while not being registered.");
-        }
         addon.setLoadingState(AddonManagerImpl.class, AbstractAddon.LoadingState.ENABLED);
         addon.onEnable();
         logger.info("Enabled addon " + addon + " v" + addon.getAddonFile().pluginVersion());

@@ -16,6 +16,7 @@ import java.util.UUID;
 /**
  * API providing some useful interfaces which should be used in addons
  */
+@Deprecated
 public interface StaffProtectAPI {
 
     /**

@@ -19,8 +19,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-public final class StaffProtect extends JavaPlugin {
+public final class StaffProtectPlugin extends JavaPlugin {
 
+    private Metrics metrics;
     private VersionController versionController;
     private StaffProtectAPI api;
     private Permission permission = new Permission() {};
@@ -51,12 +52,13 @@ public final class StaffProtect extends JavaPlugin {
         pluginManager.registerEvents(new InventoryListener(api), this);
         pluginManager.registerEvents(new PlayerListener(api), this);
 
-        final Metrics metrics = new Metrics(this, 19629);
+        metrics = new Metrics(this, 19629);
         metrics.addCustomChart(new Metrics.SingleLineChart("amount_of_addons", () -> api.getAddonManager().getAddons().size()));
     }
 
     @Override
     public void onDisable() {
+        metrics.shutdown();
         if (api == null) return;
         ((AddonManagerImpl) api.getAddonManager()).disableAddons();
     }

@@ -1,6 +1,6 @@
 package net.experience.powered.staffprotect.hooks;
 
-import net.experience.powered.staffprotect.StaffProtect;
+import net.experience.powered.staffprotect.StaffProtectPlugin;
 import net.experience.powered.staffprotect.StaffProtectAPI;
 import net.experience.powered.staffprotect.interfaces.Permission;
 import net.luckperms.api.LuckPerms;
@@ -27,7 +27,7 @@ public class LuckPermsHook implements Permission {
         } else {
             throw new IllegalStateException("LuckPerms is null, yet it was initialised");
         }
-        luckPerms.getEventBus().subscribe(JavaPlugin.getPlugin(StaffProtect.class), UserDataRecalculateEvent.class, this::UserDataRecalculate);
+        luckPerms.getEventBus().subscribe(JavaPlugin.getPlugin(StaffProtectPlugin.class), UserDataRecalculateEvent.class, this::UserDataRecalculate);
     }
 
     @Override
