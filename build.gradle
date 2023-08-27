@@ -27,12 +27,8 @@ repositories {
         url = "https://oss.sonatype.org/content/groups/public/"
     }
     maven {
-        name = "arim-mvn-lgpl3"
-        url = "https://mvn-repo.arim.space/lesser-gpl3/"
-    }
-    maven {
-        name = "paper-repo"
-        url = "https://repo.papermc.io/repository/maven-public/"
+        name = "spigot-repo"
+        url = "https://hub.spigotmc.org/nexus/content/repositories/snapshots/"
     }
 }
 
