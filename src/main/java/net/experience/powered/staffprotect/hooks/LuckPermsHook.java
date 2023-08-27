@@ -1,7 +1,7 @@
 package net.experience.powered.staffprotect.hooks;
 
+import net.experience.powered.staffprotect.StaffProtect;
 import net.experience.powered.staffprotect.StaffProtectPlugin;
-import net.experience.powered.staffprotect.StaffProtectAPI;
 import net.experience.powered.staffprotect.interfaces.Permission;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.cacheddata.CachedPermissionData;
@@ -44,7 +44,7 @@ public class LuckPermsHook implements Permission {
 
     private void UserDataRecalculate(final @NotNull UserDataRecalculateEvent e) {
         final var uuid = e.getUser().getUniqueId();
-        final var notificationBus = StaffProtectAPI.getInstance().getNotificationBus();
+        final var notificationBus = StaffProtect.getInstance().getNotificationBus();
         notificationBus.unsubscribe(uuid);
         if (hasPermission(uuid, "staffprotect.notification")) {
             notificationBus.subscribe(uuid);

@@ -1,6 +1,6 @@
 package net.experience.powered.staffprotect.impl;
 
-import net.experience.powered.staffprotect.StaffProtectAPI;
+import net.experience.powered.staffprotect.StaffProtect;
 import net.experience.powered.staffprotect.addons.AddonManager;
 import net.experience.powered.staffprotect.interfaces.Permission;
 import net.experience.powered.staffprotect.notification.NotificationBus;
@@ -10,7 +10,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 
-public class StaffProtectAPIImpl implements StaffProtectAPI {
+public class StaffProtectImpl implements StaffProtect {
 
     private final Sender sender;
     private final CommandRegisterer commandRegisterer;
@@ -19,7 +19,7 @@ public class StaffProtectAPIImpl implements StaffProtectAPI {
     private final Permission permission;
     private final NotificationBus bus;
 
-    public StaffProtectAPIImpl(
+    public StaffProtectImpl(
             final @NotNull JavaPlugin plugin,
             final @NotNull Permission permission,
             final @NotNull NotificationBus bus) {
@@ -58,7 +58,7 @@ public class StaffProtectAPIImpl implements StaffProtectAPI {
     }
 
     @Override
-    public @NotNull Sender getSenderInstance() {
+    public @NotNull Sender getDefaultSender() {
         return sender;
     }
 }

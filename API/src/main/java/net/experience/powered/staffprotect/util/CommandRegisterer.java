@@ -5,5 +5,5 @@ import org.jetbrains.annotations.NotNull;
 
 
 public interface CommandRegisterer {
-    void register(final @NotNull Command command);
+    boolean register(final @NotNull Command command);
 }

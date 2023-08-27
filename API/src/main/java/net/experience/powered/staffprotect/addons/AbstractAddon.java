@@ -1,7 +1,8 @@
 package net.experience.powered.staffprotect.addons;
 
-import net.experience.powered.staffprotect.StaffProtectAPI;
+import net.experience.powered.staffprotect.StaffProtect;
 import org.bukkit.Bukkit;
+import org.bukkit.command.Command;
 import org.bukkit.event.Listener;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -15,7 +16,7 @@ import java.net.URLClassLoader;
 public abstract class AbstractAddon {
 
     private URLClassLoader classLoader;
-    private StaffProtectAPI api;
+    private StaffProtect api;
     private AddonFile addonFile;
     private GlobalConfiguration globalConfig;
     private LoadingState loadingState;
@@ -23,7 +24,7 @@ public abstract class AbstractAddon {
     public AbstractAddon() {
     }
 
-    private void init(final @NotNull StaffProtectAPI api,
+    private void init(final @NotNull StaffProtect api,
                             final @NotNull AddonFile addonFile,
                             final @Nullable LoadingState loadingState,
                             final @NotNull URLClassLoader classLoader) {
@@ -34,15 +35,19 @@ public abstract class AbstractAddon {
         this.classLoader = classLoader;
     }
 
-    public void registerListener(final @NotNull Listener listener) {
+    public final void registerListener(final @NotNull Listener listener) {
         Bukkit.getPluginManager().registerEvents(listener, api.getPlugin());
+    }
+
+    public final boolean registerCommand(final @NotNull Command command) {
+        return api.getCommandManager().register(command);
     }
 
     /**
      * Sets a loading state
      * @param loadingState loading state
      */
-    public void setLoadingState(final @NotNull Class<?> access, final @NotNull LoadingState loadingState) {
+    public final void setLoadingState(final @NotNull Class<?> access, final @NotNull LoadingState loadingState) {
         if (!access.getClassLoader().equals(api.getPlugin().getClass().getClassLoader())) {
             throw new IllegalStateException("Trying to set loading state with different class loader.");
         }
@@ -88,7 +93,7 @@ public abstract class AbstractAddon {
      * Gets API
      * @return api
      */
-    public StaffProtectAPI getAPI() {
+    public StaffProtect getAPI() {
         return api;
     }
 
@@ -96,8 +101,10 @@ public abstract class AbstractAddon {
      * Gets whether plugin should be shown in a list of addons <br>
      * It is good to return false in case  <br>
      * If you want to change value, override it
-     * @return should be shown as addon
+     * @return whether addon should be shown
+     * @deprecated As this method was originally planned to be used because of using bukkit's plugin loading system, with our own system we do not need this method anyway, as every addon should be shown
      */
+    @Deprecated
     public boolean showAsAddon() {
         return true;
     }

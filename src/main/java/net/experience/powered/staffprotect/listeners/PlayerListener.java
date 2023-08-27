@@ -1,7 +1,7 @@
 package net.experience.powered.staffprotect.listeners;
 
+import net.experience.powered.staffprotect.StaffProtect;
 import net.experience.powered.staffprotect.StaffProtectPlugin;
-import net.experience.powered.staffprotect.StaffProtectAPI;
 import net.experience.powered.staffprotect.notification.NotificationManager;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
@@ -17,10 +17,10 @@ import java.util.UUID;
 
 public class PlayerListener implements Listener {
 
-    private final StaffProtectAPI api;
+    private final StaffProtect api;
     private final StaffProtectPlugin plugin;
 
-    public PlayerListener(final @NotNull StaffProtectAPI api) {
+    public PlayerListener(final @NotNull StaffProtect api) {
         this.api = api;
         this.plugin = StaffProtectPlugin.getPlugin(StaffProtectPlugin.class);
     }

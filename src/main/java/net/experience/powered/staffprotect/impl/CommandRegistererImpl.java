@@ -1,12 +1,11 @@
 package net.experience.powered.staffprotect.impl;
 
-import net.experience.powered.staffprotect.StaffProtectAPI;
+import net.experience.powered.staffprotect.StaffProtect;
 import net.experience.powered.staffprotect.util.CommandRegisterer;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandMap;
 import org.jetbrains.annotations.NotNull;
-import space.arim.morepaperlib.MorePaperLib;
 
 import java.lang.reflect.Field;
 
@@ -14,30 +13,34 @@ public class CommandRegistererImpl implements CommandRegisterer {
 
     private CommandMap commandMap;
 
-    public CommandRegistererImpl(final @NotNull StaffProtectAPI api, final @NotNull String bukkitName) {
-        final var paperLib = new MorePaperLib(api.getPlugin());
+    public CommandRegistererImpl(final @NotNull StaffProtect api, final @NotNull String bukkitName) {
         switch (bukkitName) {
-            // Changed with MorePaperLib api which ensures backwards compatibility
-            case "Paper", "Spigot" -> commandMap = paperLib.commandRegistration().getServerCommandMap();
+            case "Paper", "Spigot" -> {
+                init(api, bukkitName);
+            }
             default -> {
                 Bukkit.getLogger().warning("You're running on unsupported version.");
-                try {
-                    Field fCommandMap;
-                    fCommandMap = Bukkit.getPluginManager().getClass().getDeclaredField("commandMap");
-                    fCommandMap.setAccessible(true);
-                    final Object commandMapObject = fCommandMap.get(Bukkit.getPluginManager());
-                    if (commandMapObject instanceof CommandMap) {
-                        this.commandMap = (CommandMap) commandMapObject;
-                    }
-                } catch (final Exception e) {
-                    new CommandRegistererImpl(api, "Spigot");
-                }
+                init(api, bukkitName);
             }
         }
     }
 
+    private final void init(final @NotNull StaffProtect api, final @NotNull String bukkitName) {
+        try {
+            Field fCommandMap;
+            fCommandMap = Bukkit.getPluginManager().getClass().getDeclaredField("commandMap");
+            fCommandMap.setAccessible(true);
+            final Object commandMapObject = fCommandMap.get(Bukkit.getPluginManager());
+            if (commandMapObject instanceof CommandMap) {
+                this.commandMap = (CommandMap) commandMapObject;
+            }
+        } catch (final Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     @Override
-    public void register(final @NotNull Command command) {
-        commandMap.register("staffProtect", command);
+    public boolean register(final @NotNull Command command) {
+        return commandMap.register("staffProtect", command);
     }
 }

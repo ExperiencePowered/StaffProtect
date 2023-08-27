@@ -1,6 +1,6 @@
 package net.experience.powered.staffprotect.addons;
 
-import net.experience.powered.staffprotect.StaffProtectAPI;
+import net.experience.powered.staffprotect.StaffProtect;
 import org.bukkit.configuration.Configuration;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -20,7 +20,7 @@ import java.util.List;
  */
 public class GlobalConfiguration extends YamlConfiguration {
 
-    private static final JavaPlugin plugin = StaffProtectAPI.getInstance().getPlugin();
+    private static final JavaPlugin plugin = StaffProtect.getInstance().getPlugin();
 
     public static final String configVersion = "1.0";
     public static final File addonsFolder = new File(plugin.getDataFolder() + File.separator + "addons" + File.separator);
@@ -68,7 +68,7 @@ public class GlobalConfiguration extends YamlConfiguration {
         options().setHeader(header);
         options().parseComments(true);
 
-        StaffProtectAPI.getInstance().getAddonManager().getAddons().forEach(addon -> {
+        StaffProtect.getInstance().getAddonManager().getAddons().forEach(addon -> {
             try (final InputStream configStream = addon.getClass().getClassLoader().getResourceAsStream("config.yml")) {
                 if (configStream == null) {
                     return;

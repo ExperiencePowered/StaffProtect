@@ -23,10 +23,6 @@ version = '1.0-SNAPSHOT'
 repositories {
     mavenCentral()
     maven {
-        name = "spigot-repo"
-        url = "https://hub.spigotmc.org/nexus/content/groups/public/"
-    }
-    maven {
         name = "sonatype"
         url = "https://oss.sonatype.org/content/groups/public/"
     }
@@ -34,10 +30,13 @@ repositories {
         name = "arim-mvn-lgpl3"
         url = "https://mvn-repo.arim.space/lesser-gpl3/"
     }
+    maven {
+        name = "paper-repo"
+        url = "https://repo.papermc.io/repository/maven-public/"
+    }
 }
 
 dependencies {
-    implementation("space.arim.morepaperlib:morepaperlib:0.4.3")
     implementation("net.kyori:adventure-api:4.3.0")
     implementation("net.kyori:adventure-platform-bukkit:4.3.0")
     implementation("net.kyori:adventure-text-serializer-legacy:4.13.1")

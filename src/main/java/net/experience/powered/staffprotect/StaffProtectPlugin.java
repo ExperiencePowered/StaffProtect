@@ -2,7 +2,7 @@ package net.experience.powered.staffprotect;
 
 import net.experience.powered.staffprotect.hooks.LuckPermsHook;
 import net.experience.powered.staffprotect.impl.AddonManagerImpl;
-import net.experience.powered.staffprotect.impl.StaffProtectAPIImpl;
+import net.experience.powered.staffprotect.impl.StaffProtectImpl;
 import net.experience.powered.staffprotect.interfaces.Permission;
 import net.experience.powered.staffprotect.listeners.InventoryListener;
 import net.experience.powered.staffprotect.listeners.PlayerListener;
@@ -23,7 +23,7 @@ public final class StaffProtectPlugin extends JavaPlugin {
 
     private Metrics metrics;
     private VersionController versionController;
-    private StaffProtectAPI api;
+    private StaffProtect api;
     private Permission permission = new Permission() {};
 
     @Override
@@ -45,7 +45,7 @@ public final class StaffProtectPlugin extends JavaPlugin {
         }
 
         api = getStaffProtectAPI();
-        Bukkit.getServicesManager().register(StaffProtectAPI.class, api, this, ServicePriority.Normal);
+        Bukkit.getServicesManager().register(StaffProtect.class, api, this, ServicePriority.Normal);
         ((AddonManagerImpl) api.getAddonManager()).enableAddons();
 
         final var pluginManager = Bukkit.getPluginManager();
@@ -64,7 +64,7 @@ public final class StaffProtectPlugin extends JavaPlugin {
     }
 
     @NotNull
-    private StaffProtectAPIImpl getStaffProtectAPI() {
+    private StaffProtect getStaffProtectAPI() {
         final NotificationBus bus = new NotificationBus() {
 
             private final List<UUID> subscribers = new ArrayList<>();
@@ -84,6 +84,8 @@ public final class StaffProtectPlugin extends JavaPlugin {
                 return Collections.unmodifiableList(subscribers);
             }
         };
-        return new StaffProtectAPIImpl(this, permission, bus);
+        final StaffProtect staffProtect = new StaffProtectImpl(this, permission, bus);
+        new StaffProtectProvider(staffProtect);
+        return staffProtect;
     }
 }

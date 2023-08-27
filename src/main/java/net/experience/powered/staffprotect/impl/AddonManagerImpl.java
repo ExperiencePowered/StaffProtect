@@ -1,6 +1,6 @@
 package net.experience.powered.staffprotect.impl;
 
-import net.experience.powered.staffprotect.StaffProtectAPI;
+import net.experience.powered.staffprotect.StaffProtect;
 import net.experience.powered.staffprotect.addons.AbstractAddon;
 import net.experience.powered.staffprotect.addons.AddonFile;
 import net.experience.powered.staffprotect.addons.AddonManager;
@@ -22,11 +22,11 @@ import java.util.logging.Logger;
 public class AddonManagerImpl implements AddonManager {
 
     private final Logger logger;
-    private final StaffProtectAPI api;
+    private final StaffProtect api;
     private final HashMap<AbstractAddon, URLClassLoader> addons;
     private GlobalConfiguration globalConfiguration;
 
-    public AddonManagerImpl(final @NotNull StaffProtectAPI api) {
+    public AddonManagerImpl(final @NotNull StaffProtect api) {
         this.api = api;
         this.logger = api.getPlugin().getLogger();
         this.addons = new HashMap<>();
@@ -127,7 +127,7 @@ public class AddonManagerImpl implements AddonManager {
 
         final Constructor<?> constructor = clazz.getDeclaredConstructor();
         final AbstractAddon addon = (AbstractAddon) constructor.newInstance();
-        final Method method = AbstractAddon.class.getDeclaredMethod("init", StaffProtectAPI.class, AddonFile.class, AbstractAddon.LoadingState.class, URLClassLoader.class);
+        final Method method = AbstractAddon.class.getDeclaredMethod("init", StaffProtect.class, AddonFile.class, AbstractAddon.LoadingState.class, URLClassLoader.class);
         method.setAccessible(true);
         method.invoke(addon, api, addonFile, AbstractAddon.LoadingState.UNKNOWN, classLoader);
 
@@ -139,6 +139,7 @@ public class AddonManagerImpl implements AddonManager {
 
     @Override
     public void unload(final @NotNull AbstractAddon addon) throws IOException {
+        addon.onUnload();
         final URLClassLoader classLoader = addons.get(addon);
         classLoader.close();
         logger.info("Unloaded addon " + addon + " v" + addon.getAddonFile().pluginVersion());

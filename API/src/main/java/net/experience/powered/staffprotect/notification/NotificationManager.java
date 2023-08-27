@@ -1,6 +1,6 @@
 package net.experience.powered.staffprotect.notification;
 
-import net.experience.powered.staffprotect.StaffProtectAPI;
+import net.experience.powered.staffprotect.StaffProtect;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
@@ -73,7 +73,7 @@ public class NotificationManager {
      */
     @Contract(" -> new")
     public static @NotNull NotificationManager getInstance() {
-        final StaffProtectAPI api = StaffProtectAPI.getInstance();
+        final StaffProtect api = StaffProtect.getInstance();
         return new NotificationManager(api.getPlugin(), api.getNotificationBus());
     }
 }

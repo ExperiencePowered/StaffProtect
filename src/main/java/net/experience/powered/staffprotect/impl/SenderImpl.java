@@ -1,6 +1,6 @@
 package net.experience.powered.staffprotect.impl;
 
-import net.experience.powered.staffprotect.StaffProtectAPI;
+import net.experience.powered.staffprotect.StaffProtect;
 import net.experience.powered.staffprotect.notification.Sender;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import net.kyori.adventure.text.Component;
@@ -16,10 +16,10 @@ import java.util.concurrent.CompletableFuture;
 
 public class SenderImpl extends Sender {
 
-    private final StaffProtectAPI api;
+    private final StaffProtect api;
     private final List<UUID> uuids;
 
-    public SenderImpl(final @NotNull StaffProtectAPI api) {
+    public SenderImpl(final @NotNull StaffProtect api) {
         this.uuids = new ArrayList<>();
         this.api = api;
     }
