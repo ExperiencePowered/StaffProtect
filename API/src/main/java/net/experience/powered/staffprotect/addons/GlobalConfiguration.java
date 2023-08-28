@@ -20,17 +20,26 @@ import java.util.List;
  */
 public class GlobalConfiguration extends YamlConfiguration {
 
-    private static final JavaPlugin plugin = StaffProtect.getInstance().getPlugin();
+    private static GlobalConfiguration instance;
 
     public static final String configVersion = "1.0";
-    public static final File addonsFolder = new File(plugin.getDataFolder() + File.separator + "addons" + File.separator);
-    public static final File path = new File(addonsFolder, "global_config.yml");
+    public static final File addonsFolder;
+    public static final File path;
+
+    static {
+        JavaPlugin plugin = StaffProtect.getInstance().getPlugin();
+        addonsFolder = new File(plugin.getDataFolder() + File.separator + "addons" + File.separator);
+        path = new File(addonsFolder, "global_config.yml");
+    }
 
     public GlobalConfiguration() {
         if (!GlobalConfiguration.path.exists()) {
             saveConfig();
         }
         reloadConfig();
+        if (instance == null) {
+            GlobalConfiguration.instance = this;
+        }
     }
 
     public void saveConfig() { // Copied from JavaPlugin
@@ -92,5 +101,12 @@ public class GlobalConfiguration extends YamlConfiguration {
         if (!contains(path)) {
             set(path, value);
         }
+    }
+
+    public static GlobalConfiguration getInstance() {
+        if (instance == null) {
+            new GlobalConfiguration();
+        }
+        return instance;
     }
 }
