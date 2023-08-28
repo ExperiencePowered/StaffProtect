@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -40,19 +41,42 @@ public class AddonManagerImpl implements AddonManager {
         }
 
         Arrays.stream(Objects.requireNonNull(addonFolder.listFiles())).filter(File::isFile).forEach(file -> {
+            AbstractAddon addon = null;
             try {
                 if (extractExtension(file).equals("jar")) {
-                    final AbstractAddon addon = load(file);
+                    addon = load(file);
                     addons.put(addon, addon.getClassLoader());
                     register(addon);
                 }
             } catch (Exception e) {
-                throw new RuntimeException(e);
+                logger.severe("Addon " + file.getName() + " thrown exception during loading.");
+                try {
+                    Field field = AbstractAddon.class.getDeclaredField("classLoader");
+                    if (addon != null) {
+                        field.set(addon, null);
+                    }
+                } catch (NoSuchFieldException | IllegalAccessException ex) {
+                    e.printStackTrace();
+                }
+                if (addon != null) {
+                    if (addon.getClassLoader() != null) {
+                        try {
+                            addon.getClassLoader().close();
+                        } catch (IOException ex) {
+                            throw new RuntimeException(ex);
+                        }
+                    }
+                }
+                e.printStackTrace();
             }
         });
         globalConfiguration = new GlobalConfiguration();
         globalConfiguration.saveDefaultConfig();
-        addons.forEach((addon, classLoader) -> enable(addon)); // Enables addons
+        addons.forEach((addon, classLoader) -> {
+            if (addon.getClassLoader() != null) {
+                enable(addon);
+            }
+        }); // Enables addons
     }
 
     public void disableAddons() {
