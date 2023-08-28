@@ -9,6 +9,7 @@ import net.experience.powered.staffprotect.notification.NotificationBus;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -109,19 +110,43 @@ public class StaffProtectCommand extends Command {
             if (action.equalsIgnoreCase("reload")) {
                 final boolean result = reloadAddon(javaPlugin, impl, addon, player);
                 final Component component = Component.text("Reloaded addon ", GOLD).append(Component.text(pluginName, BLUE));
-                if (result) SenderImpl.getInstance(player).sendMessage(MiniMessage.miniMessage().deserializeOr(javaPlugin.getConfig().getString("commands.addon.reloaded"), component));
+                final String string = javaPlugin.getConfig().getString("commands.addon.reloaded");
+                if (result) {
+                    if (string == null) {
+                        SenderImpl.getInstance(player).sendMessage(component);
+                    }
+                    else {
+                        SenderImpl.getInstance(player).sendMessage(MiniMessage.miniMessage().deserialize(string, Placeholder.unparsed("addon", pluginName)));
+                    }
+                }
                 return result;
             }
             else if (action.equalsIgnoreCase("enable")) {
                 final boolean result = enableAddon(javaPlugin, impl, addon, player);
                 final Component component = Component.text("enabled addon ", GOLD).append(Component.text(pluginName, BLUE));
-                if (result) SenderImpl.getInstance(player).sendMessage(MiniMessage.miniMessage().deserializeOr(javaPlugin.getConfig().getString("commands.addon.enabled"), component));
+                final String string = javaPlugin.getConfig().getString("commands.addon.enabled");
+                if (result) {
+                    if (string == null) {
+                        SenderImpl.getInstance(player).sendMessage(component);
+                    }
+                    else {
+                        SenderImpl.getInstance(player).sendMessage(MiniMessage.miniMessage().deserialize(string, Placeholder.unparsed("addon", pluginName)));
+                    }
+                }
                 return result;
             }
             else if (action.equalsIgnoreCase("disable")) {
                 final boolean result = disableAddon(javaPlugin, impl, addon, player);
                 final Component component = Component.text("Disabled addon ", GOLD).append(Component.text(pluginName, BLUE));
-                if (result) SenderImpl.getInstance(player).sendMessage(MiniMessage.miniMessage().deserializeOr(javaPlugin.getConfig().getString("commands.addon.disabled"), component));
+                final String string = javaPlugin.getConfig().getString("commands.addon.disabled");
+                if (result) {
+                    if (string == null) {
+                        SenderImpl.getInstance(player).sendMessage(component);
+                    }
+                    else {
+                        SenderImpl.getInstance(player).sendMessage(MiniMessage.miniMessage().deserialize(string, Placeholder.unparsed("addon", pluginName)));
+                    }
+                }
                 return result;
             }
             final Component component = Component.text("Couldn't find action type with this input.", RED);
