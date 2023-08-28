@@ -2,6 +2,7 @@ package net.experience.powered.staffprotect.listeners;
 
 import net.experience.powered.staffprotect.StaffProtect;
 import net.experience.powered.staffprotect.StaffProtectPlugin;
+import net.experience.powered.staffprotect.impl.SenderImpl;
 import net.experience.powered.staffprotect.notification.NotificationManager;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
@@ -12,6 +13,8 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
 
 public class InventoryListener implements Listener {
 
@@ -55,8 +58,7 @@ public class InventoryListener implements Listener {
         final var string = configuration.getString("notification.creative-tracking.message", "String not found.");
         final var miniMessage = MiniMessage.miniMessage();
         final var component = miniMessage.deserialize(string, Placeholder.parsed("player", player.getName()), Placeholder.parsed("item", fItem));
-        final var notificationManager = NotificationManager.getInstance();
-
-        notificationManager.sendMessage(component);
+        final var sender = new SenderImpl(api, api.getNotificationBus().getSubscribers());
+        sender.sendMessage(component);
     }
 }

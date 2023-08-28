@@ -37,7 +37,7 @@ public interface AddonManager {
      * Disables an addon
      * @param addon addon to disable
      */
-    void disable(final @NotNull AbstractAddon addon) throws IOException;
+    void disable(final @NotNull AbstractAddon addon);
 
     /**
      * Enables an addon

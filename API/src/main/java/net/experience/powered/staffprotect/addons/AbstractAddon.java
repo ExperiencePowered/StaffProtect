@@ -7,6 +7,7 @@ import org.bukkit.event.Listener;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.File;
 import java.net.URLClassLoader;
 
 /**
@@ -20,6 +21,7 @@ public abstract class AbstractAddon {
     private AddonFile addonFile;
     private GlobalConfiguration globalConfig;
     private LoadingState loadingState;
+    private File file;
 
     public AbstractAddon() {
     }
@@ -27,12 +29,14 @@ public abstract class AbstractAddon {
     private void init(final @NotNull StaffProtect api,
                             final @NotNull AddonFile addonFile,
                             final @Nullable LoadingState loadingState,
-                            final @NotNull URLClassLoader classLoader) {
+                            final @NotNull URLClassLoader classLoader,
+                            final @NotNull File file) {
         this.loadingState = loadingState == null ? AbstractAddon.LoadingState.UNKNOWN : loadingState;
         this.api = api;
         this.globalConfig = new GlobalConfiguration();
         this.addonFile = addonFile;
         this.classLoader = classLoader;
+        this.file = file;
     }
 
     public final void registerListener(final @NotNull Listener listener) {
@@ -41,6 +45,10 @@ public abstract class AbstractAddon {
 
     public final boolean registerCommand(final @NotNull Command command) {
         return api.getCommandManager().register(command);
+    }
+
+    public @NotNull File getFile() {
+        return file;
     }
 
     /**
@@ -84,7 +92,7 @@ public abstract class AbstractAddon {
             throw new RuntimeException("Cannot access global configuration until plugin is fully enabled.");
         }
         if (globalConfig == null) {
-            globalConfig = new GlobalConfiguration();
+            globalConfig = GlobalConfiguration.getInstance();
         }
         return globalConfig;
     }
@@ -144,7 +152,11 @@ public abstract class AbstractAddon {
          */
         ENABLED,
         /**
-         * When addon is unregistered, disabled or none of those two
+         * When addon is disabled
+         */
+        DISABLED,
+        /**
+         * When addon is unregistered or unloaded
          */
         UNKNOWN
     }

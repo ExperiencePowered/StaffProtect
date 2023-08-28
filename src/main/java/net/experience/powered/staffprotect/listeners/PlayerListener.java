@@ -2,7 +2,7 @@ package net.experience.powered.staffprotect.listeners;
 
 import net.experience.powered.staffprotect.StaffProtect;
 import net.experience.powered.staffprotect.StaffProtectPlugin;
-import net.experience.powered.staffprotect.notification.NotificationManager;
+import net.experience.powered.staffprotect.impl.SenderImpl;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.entity.Player;
@@ -48,8 +48,7 @@ public class PlayerListener implements Listener {
         final var string = configuration.getString("notification.command-executed", "String not found.");
         final var miniMessage = MiniMessage.miniMessage();
         final var component = miniMessage.deserialize(string, Placeholder.parsed("player", player.getName()), Placeholder.parsed("command", e.getMessage()));
-        final var notificationManager = NotificationManager.getInstance();
-
-        notificationManager.sendMessage(component);
+        final var sender = new SenderImpl(api, api.getNotificationBus().getSubscribers());
+        sender.sendMessage(component);
     }
 }

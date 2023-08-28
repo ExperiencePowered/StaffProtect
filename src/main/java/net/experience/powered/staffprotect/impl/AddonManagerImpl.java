@@ -7,6 +7,7 @@ import net.experience.powered.staffprotect.addons.AddonManager;
 import net.experience.powered.staffprotect.addons.GlobalConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
@@ -58,8 +59,8 @@ public class AddonManagerImpl implements AddonManager {
         for (final Map.Entry<AbstractAddon, URLClassLoader> entry : addons.entrySet()) {
             try {
                 final AbstractAddon addon = entry.getKey();
-                unregister(addon);
                 disable(addon);
+                unregister(addon);
                 unload(addon);
             } catch (IOException e) {
                 throw new RuntimeException(e);
@@ -127,9 +128,9 @@ public class AddonManagerImpl implements AddonManager {
 
         final Constructor<?> constructor = clazz.getDeclaredConstructor();
         final AbstractAddon addon = (AbstractAddon) constructor.newInstance();
-        final Method method = AbstractAddon.class.getDeclaredMethod("init", StaffProtect.class, AddonFile.class, AbstractAddon.LoadingState.class, URLClassLoader.class);
+        final Method method = AbstractAddon.class.getDeclaredMethod("init", StaffProtect.class, AddonFile.class, AbstractAddon.LoadingState.class, URLClassLoader.class, File.class);
         method.setAccessible(true);
-        method.invoke(addon, api, addonFile, AbstractAddon.LoadingState.UNKNOWN, classLoader);
+        method.invoke(addon, api, addonFile, AbstractAddon.LoadingState.UNKNOWN, classLoader, file);
 
         this.register(addon);
         addon.onLoad();
@@ -162,8 +163,8 @@ public class AddonManagerImpl implements AddonManager {
     }
 
     @Override
-    public void disable(final @NotNull AbstractAddon addon) throws IOException {
-        addon.setLoadingState(AddonManagerImpl.class, AbstractAddon.LoadingState.UNKNOWN);
+    public void disable(final @NotNull AbstractAddon addon) {
+        addon.setLoadingState(AddonManagerImpl.class, AbstractAddon.LoadingState.DISABLED);
         addon.onDisable();
         logger.info("Disabled addon " + addon + " v" + addon.getAddonFile().pluginVersion());
     }
@@ -178,5 +179,15 @@ public class AddonManagerImpl implements AddonManager {
     @Override
     public @NotNull Set<AbstractAddon> getAddons() {
         return Collections.unmodifiableSet(addons.keySet());
+    }
+
+    public @Nullable AbstractAddon findAddon(final @NotNull String name) {
+        for (final AbstractAddon addon : getAddons()) {
+            final String pluginName = addon.getAddonFile().pluginName();
+            if (pluginName.equalsIgnoreCase(name)) {
+                return addon;
+            }
+        }
+        return null;
     }
 }

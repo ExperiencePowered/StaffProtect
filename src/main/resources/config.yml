@@ -11,3 +11,22 @@ notification:
       # If material name has space instead of space replace it with _
       # This is meant just to key, value ("<purple>CORRUPTED DIRT") can be with spaces
   command-executed: "<red>Player <blue><player></blue> executed command <gold><command></gold>."
+commands:
+  insufficient-permissions: "<red>You do not have enough permissions to continue."
+  reloaded-config: "<gold>Reloaded config.yml."
+  reloaded-global-config: "<gold>Reloaded global_configuration.yml."
+  notification:
+    missing-type: "<red>Wrong command usage: <gold>/staffprotect notification subscribe/unsubscribe"
+    enabled: "<gold>Notifications were enabled."
+    disabled: "<gold>Notifications were disabled."
+  addon:
+    missing-name: "<red>Missing addon name."
+    invalid-addon: "<red>Couldn't find addon with this name."
+    missing-action: "<red>Missing action type (reload/enable/disable)."
+    invalid-action: "<red>Couldn't find action type with this input."
+    reloaded: "<gold>Reloaded addon <blue><addon>."
+    enabled: "<gold>Enabled addon <blue><addon>."
+    disabled: "<gold>Disabled addon <blue><addon>."
+    already:
+      disabled: "<red>Addon is already disabled."
+      enabled: "<red>Addon is already enabled."

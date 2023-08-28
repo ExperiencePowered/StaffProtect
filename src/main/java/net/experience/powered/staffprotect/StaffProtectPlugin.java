@@ -1,5 +1,6 @@
 package net.experience.powered.staffprotect;
 
+import net.experience.powered.staffprotect.commands.StaffProtectCommand;
 import net.experience.powered.staffprotect.hooks.LuckPermsHook;
 import net.experience.powered.staffprotect.impl.AddonManagerImpl;
 import net.experience.powered.staffprotect.impl.StaffProtectImpl;
@@ -51,6 +52,8 @@ public final class StaffProtectPlugin extends JavaPlugin {
         final var pluginManager = Bukkit.getPluginManager();
         pluginManager.registerEvents(new InventoryListener(api), this);
         pluginManager.registerEvents(new PlayerListener(api), this);
+
+        api.getCommandManager().register(new StaffProtectCommand(api));
 
         metrics = new Metrics(this, 19629);
         metrics.addCustomChart(new Metrics.SingleLineChart("amount_of_addons", () -> api.getAddonManager().getAddons().size()));
