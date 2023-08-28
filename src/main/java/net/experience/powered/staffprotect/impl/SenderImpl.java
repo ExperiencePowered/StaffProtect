@@ -24,6 +24,11 @@ public class SenderImpl extends Sender {
         this.api = api;
     }
 
+    public SenderImpl(final @NotNull StaffProtect api, final @NotNull List<UUID> uuids) {
+        this.uuids = uuids;
+        this.api = api;
+    }
+
     @Override
     public Sender player(@NotNull Player player) {
         final SenderImpl impl = new SenderImpl(api);
