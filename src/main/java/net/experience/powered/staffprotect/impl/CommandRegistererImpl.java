@@ -15,9 +15,7 @@ public class CommandRegistererImpl implements CommandRegisterer {
 
     public CommandRegistererImpl(final @NotNull StaffProtect api, final @NotNull String bukkitName) {
         switch (bukkitName) {
-            case "Paper", "Spigot" -> {
-                init(api, bukkitName);
-            }
+            case "Paper", "Spigot" -> init(api, bukkitName);
             default -> {
                 Bukkit.getLogger().warning("You're running on unsupported version.");
                 init(api, bukkitName);
@@ -25,7 +23,7 @@ public class CommandRegistererImpl implements CommandRegisterer {
         }
     }
 
-    private final void init(final @NotNull StaffProtect api, final @NotNull String bukkitName) {
+    private void init(final @NotNull StaffProtect api, final @NotNull String bukkitName) {
         try {
             Field fCommandMap;
             fCommandMap = Bukkit.getPluginManager().getClass().getDeclaredField("commandMap");
@@ -42,5 +40,14 @@ public class CommandRegistererImpl implements CommandRegisterer {
     @Override
     public boolean register(final @NotNull Command command) {
         return commandMap.register("staffProtect", command);
+    }
+
+    @Override
+    public boolean unregister(@NotNull Command command) {
+        final Command foundCommand = commandMap.getCommand(command.getName());
+        if (foundCommand == null) {
+            return false;
+        }
+        return foundCommand.unregister(commandMap);
     }
 }
