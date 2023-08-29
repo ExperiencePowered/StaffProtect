@@ -6,6 +6,7 @@ import net.experience.powered.staffprotect.addons.AddonFile;
 import net.experience.powered.staffprotect.addons.AddonManager;
 import net.experience.powered.staffprotect.addons.GlobalConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -192,6 +193,8 @@ public class AddonManagerImpl implements AddonManager {
         addon.onDisable();
         addon.getListeners().forEach(addon::unregisterListener);
         addon.getCommands().forEach(addon::unregisterCommand);
+        addon.getTasks().forEach(BukkitTask::cancel);
+        addon.getScheduler().getGlobalTask().cancel();
         logger.info("Disabled addon " + addon + " v" + addon.getAddonFile().pluginVersion());
     }
 

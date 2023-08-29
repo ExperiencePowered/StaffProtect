@@ -1,6 +1,7 @@
 package net.experience.powered.staffprotect.addons;
 
 import net.experience.powered.staffprotect.StaffProtect;
+import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -18,7 +19,9 @@ public abstract class AbstractAddon {
 
     private final Set<MinecraftListener> listeners = new HashSet<>();
     private final Set<MinecraftCommand> commands = new HashSet<>();
+    private final Set<BukkitTask> tasks = new HashSet<>();
 
+    private MinecraftScheduler scheduler;
     private URLClassLoader classLoader;
     private StaffProtect api;
     private AddonFile addonFile;
@@ -40,6 +43,7 @@ public abstract class AbstractAddon {
         this.addonFile = addonFile;
         this.classLoader = classLoader;
         this.file = file;
+        this.scheduler = new MinecraftScheduler(tasks);
     }
 
     public final void registerListener(final @NotNull MinecraftListener listener) {
@@ -64,12 +68,20 @@ public abstract class AbstractAddon {
         return result;
     }
 
+    public final MinecraftScheduler getScheduler() {
+        return scheduler;
+    }
+
     public Set<MinecraftListener> getListeners() {
         return Collections.unmodifiableSet(listeners);
     }
 
     public Set<MinecraftCommand> getCommands() {
         return Collections.unmodifiableSet(commands);
+    }
+
+    public Set<BukkitTask> getTasks() {
+        return Collections.unmodifiableSet(tasks);
     }
 
     public @NotNull File getFile() {
