@@ -1,6 +1,7 @@
 plugins {
     id 'maven-publish'
     id 'java'
+    id 'org.jetbrains.kotlin.jvm' version '1.9.10'
 }
 
 group = 'net.experienced.powered.staffprotect'
@@ -18,8 +19,6 @@ publishing {
 def targetJavaVersion = 17
 java {
     def javaVersion = JavaVersion.toVersion(targetJavaVersion)
-    sourceCompatibility = javaVersion
-    targetCompatibility = javaVersion
     if (JavaVersion.current() < javaVersion) {
         toolchain.languageVersion = JavaLanguageVersion.of(targetJavaVersion)
     }
@@ -29,4 +28,13 @@ tasks.withType(JavaCompile).configureEach {
     if (targetJavaVersion >= 10 || JavaVersion.current().isJava10Compatible()) {
         options.release = targetJavaVersion
     }
+}
+repositories {
+    mavenCentral()
+}
+dependencies {
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+}
+kotlin {
+    jvmToolchain(17)
 }

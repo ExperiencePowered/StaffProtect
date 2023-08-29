@@ -1,10 +1,12 @@
 package net.experience.powered.staffprotect.listeners;
 
 import net.experience.powered.staffprotect.StaffProtect;
-import net.experience.powered.staffprotect.StaffProtectAPI;
+import net.experience.powered.staffprotect.StaffProtectPlugin;
 import net.experience.powered.staffprotect.notification.NotificationManager;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
+import org.bukkit.configuration.Configuration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -17,19 +19,19 @@ import java.util.UUID;
 
 public class PlayerListener implements Listener {
 
-    private final StaffProtectAPI api;
-    private final StaffProtect plugin;
+    private final StaffProtect api;
+    private final StaffProtectPlugin plugin;
 
-    public PlayerListener(final @NotNull StaffProtectAPI api) {
+    public PlayerListener(final @NotNull StaffProtect api) {
         this.api = api;
-        this.plugin = StaffProtect.getPlugin(StaffProtect.class);
+        this.plugin = StaffProtectPlugin.getPlugin(StaffProtectPlugin.class);
     }
 
     @EventHandler
     public void PlayerJoin(final @NotNull PlayerJoinEvent e) {
         final Player player = e.getPlayer();
         final UUID uuid = player.getUniqueId();
-        if (api.getPermission().hasPermission(uuid, "staffprotect.notification")) {
+        if (player.hasPermission("staffprotect.notification")) {
             api.getNotificationBus().subscribe(uuid);
         }
     }
@@ -44,12 +46,10 @@ public class PlayerListener implements Listener {
     @EventHandler
     public void PlayerCommandExecute(final @NotNull PlayerCommandPreprocessEvent e) {
         final Player player = e.getPlayer();
-        final var configuration = plugin.getConfig();
-        final var string = configuration.getString("notification.command-executed", "String not found.");
-        final var miniMessage = MiniMessage.miniMessage();
-        final var component = miniMessage.deserialize(string, Placeholder.parsed("player", player.getName()), Placeholder.parsed("command", e.getMessage()));
-        final var notificationManager = NotificationManager.getInstance();
-
-        notificationManager.sendMessage(component);
+        final Configuration configuration = plugin.getConfig();
+        final String string = configuration.getString("notification.command-executed", "String not found.");
+        final MiniMessage miniMessage = MiniMessage.miniMessage();
+        final Component component = miniMessage.deserialize(string, Placeholder.parsed("player", player.getName()), Placeholder.parsed("command", e.getMessage()));
+        NotificationManager.getInstance().sendMessage(player.getName(), component);
     }
 }

@@ -1,18 +1,21 @@
 package net.experience.powered.staffprotect.impl;
 
-import net.experience.powered.staffprotect.StaffProtectAPI;
+import net.experience.powered.staffprotect.StaffProtect;
 import net.experience.powered.staffprotect.addons.AbstractAddon;
 import net.experience.powered.staffprotect.addons.AddonFile;
 import net.experience.powered.staffprotect.addons.AddonManager;
 import net.experience.powered.staffprotect.addons.GlobalConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -22,11 +25,11 @@ import java.util.logging.Logger;
 public class AddonManagerImpl implements AddonManager {
 
     private final Logger logger;
-    private final StaffProtectAPI api;
+    private final StaffProtect api;
     private final HashMap<AbstractAddon, URLClassLoader> addons;
     private GlobalConfiguration globalConfiguration;
 
-    public AddonManagerImpl(final @NotNull StaffProtectAPI api) {
+    public AddonManagerImpl(final @NotNull StaffProtect api) {
         this.api = api;
         this.logger = api.getPlugin().getLogger();
         this.addons = new HashMap<>();
@@ -39,18 +42,42 @@ public class AddonManagerImpl implements AddonManager {
         }
 
         Arrays.stream(Objects.requireNonNull(addonFolder.listFiles())).filter(File::isFile).forEach(file -> {
+            AbstractAddon addon = null;
             try {
                 if (extractExtension(file).equals("jar")) {
-                    final AbstractAddon addon = load(file);
+                    addon = load(file);
                     addons.put(addon, addon.getClassLoader());
+                    register(addon);
                 }
             } catch (Exception e) {
-                throw new RuntimeException(e);
+                logger.severe("Addon " + file.getName() + " thrown exception during loading.");
+                try {
+                    Field field = AbstractAddon.class.getDeclaredField("classLoader");
+                    if (addon != null) {
+                        field.set(addon, null);
+                    }
+                } catch (NoSuchFieldException | IllegalAccessException ex) {
+                    e.printStackTrace();
+                }
+                if (addon != null) {
+                    if (addon.getClassLoader() != null) {
+                        try {
+                            addon.getClassLoader().close();
+                        } catch (IOException ex) {
+                            throw new RuntimeException(ex);
+                        }
+                    }
+                }
+                e.printStackTrace();
             }
         });
         globalConfiguration = new GlobalConfiguration();
         globalConfiguration.saveDefaultConfig();
-        addons.forEach((addon, classLoader) -> enable(addon)); // Enables addons
+        addons.forEach((addon, classLoader) -> {
+            if (addon.getClassLoader() != null) {
+                enable(addon);
+            }
+        }); // Enables addons
     }
 
     public void disableAddons() {
@@ -58,6 +85,7 @@ public class AddonManagerImpl implements AddonManager {
             try {
                 final AbstractAddon addon = entry.getKey();
                 disable(addon);
+                unregister(addon);
                 unload(addon);
             } catch (IOException e) {
                 throw new RuntimeException(e);
@@ -125,9 +153,9 @@ public class AddonManagerImpl implements AddonManager {
 
         final Constructor<?> constructor = clazz.getDeclaredConstructor();
         final AbstractAddon addon = (AbstractAddon) constructor.newInstance();
-        final Method method = AbstractAddon.class.getDeclaredMethod("init", StaffProtectAPI.class, AddonFile.class, AbstractAddon.LoadingState.class, URLClassLoader.class);
+        final Method method = AbstractAddon.class.getDeclaredMethod("init", StaffProtect.class, AddonFile.class, AbstractAddon.LoadingState.class, URLClassLoader.class, File.class);
         method.setAccessible(true);
-        method.invoke(addon, api, addonFile, AbstractAddon.LoadingState.UNKNOWN, classLoader);
+        method.invoke(addon, api, addonFile, AbstractAddon.LoadingState.UNKNOWN, classLoader, file);
 
         this.register(addon);
         addon.onLoad();
@@ -137,6 +165,7 @@ public class AddonManagerImpl implements AddonManager {
 
     @Override
     public void unload(final @NotNull AbstractAddon addon) throws IOException {
+        addon.onUnload();
         final URLClassLoader classLoader = addons.get(addon);
         classLoader.close();
         logger.info("Unloaded addon " + addon + " v" + addon.getAddonFile().pluginVersion());
@@ -159,20 +188,18 @@ public class AddonManagerImpl implements AddonManager {
     }
 
     @Override
-    public void disable(final @NotNull AbstractAddon addon) throws IOException {
-        unregister(addon);
-        addon.setLoadingState(AddonManagerImpl.class, AbstractAddon.LoadingState.UNKNOWN);
+    public void disable(final @NotNull AbstractAddon addon) {
+        addon.setLoadingState(AddonManagerImpl.class, AbstractAddon.LoadingState.DISABLED);
         addon.onDisable();
+        addon.getListeners().forEach(addon::unregisterListener);
+        addon.getCommands().forEach(addon::unregisterCommand);
+        addon.getTasks().forEach(BukkitTask::cancel);
+        addon.getScheduler().getGlobalTask().cancel();
         logger.info("Disabled addon " + addon + " v" + addon.getAddonFile().pluginVersion());
     }
 
     @Override
     public void enable(final @NotNull AbstractAddon addon) {
-        if (!addons.containsKey(addon)) {
-            /* Addon should always be registered before enabling,
-            this may happen only as a result by playing with reflections */
-            throw new IllegalStateException("Tried to enable addon while not being registered.");
-        }
         addon.setLoadingState(AddonManagerImpl.class, AbstractAddon.LoadingState.ENABLED);
         addon.onEnable();
         logger.info("Enabled addon " + addon + " v" + addon.getAddonFile().pluginVersion());
@@ -181,5 +208,15 @@ public class AddonManagerImpl implements AddonManager {
     @Override
     public @NotNull Set<AbstractAddon> getAddons() {
         return Collections.unmodifiableSet(addons.keySet());
+    }
+
+    public @Nullable AbstractAddon findAddon(final @NotNull String name) {
+        for (final AbstractAddon addon : getAddons()) {
+            final String pluginName = addon.getAddonFile().pluginName();
+            if (pluginName.equalsIgnoreCase(name)) {
+                return addon;
+            }
+        }
+        return null;
     }
 }
