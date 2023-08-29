@@ -1,20 +1,23 @@
 package net.experience.powered.staffprotect.addons;
 
 import net.experience.powered.staffprotect.StaffProtect;
-import org.bukkit.Bukkit;
-import org.bukkit.command.Command;
-import org.bukkit.event.Listener;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.net.URLClassLoader;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Addon which is in addon folder
  *
  */
 public abstract class AbstractAddon {
+
+    private final Set<MinecraftListener> listeners = new HashSet<>();
+    private final Set<MinecraftCommand> commands = new HashSet<>();
 
     private URLClassLoader classLoader;
     private StaffProtect api;
@@ -39,12 +42,34 @@ public abstract class AbstractAddon {
         this.file = file;
     }
 
-    public final void registerListener(final @NotNull Listener listener) {
-        Bukkit.getPluginManager().registerEvents(listener, api.getPlugin());
+    public final void registerListener(final @NotNull MinecraftListener listener) {
+        listener.enable();
+        listeners.add(listener);
     }
 
-    public final boolean registerCommand(final @NotNull Command command) {
-        return api.getCommandManager().register(command);
+    public final void unregisterListener(final @NotNull MinecraftListener listener) {
+        listener.disable();
+        listeners.remove(listener);
+    }
+
+    public final boolean registerCommand(final @NotNull MinecraftCommand command) {
+        boolean result = api.getCommandManager().register(command);
+        commands.add(command);
+        return result;
+    }
+
+    public final boolean unregisterCommand(final @NotNull MinecraftCommand command) {
+        boolean result = api.getCommandManager().unregister(command);
+        commands.remove(command);
+        return result;
+    }
+
+    public Set<MinecraftListener> getListeners() {
+        return Collections.unmodifiableSet(listeners);
+    }
+
+    public Set<MinecraftCommand> getCommands() {
+        return Collections.unmodifiableSet(commands);
     }
 
     public @NotNull File getFile() {
