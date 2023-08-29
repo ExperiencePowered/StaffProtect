@@ -2,7 +2,6 @@ package net.experience.powered.staffprotect.impl;
 
 import net.experience.powered.staffprotect.StaffProtect;
 import net.experience.powered.staffprotect.addons.AddonManager;
-import net.experience.powered.staffprotect.interfaces.Permission;
 import net.experience.powered.staffprotect.notification.NotificationBus;
 import net.experience.powered.staffprotect.notification.Sender;
 import net.experience.powered.staffprotect.util.CommandRegisterer;
@@ -16,25 +15,14 @@ public class StaffProtectImpl implements StaffProtect {
     private final CommandRegisterer commandRegisterer;
     private final AddonManager addonManager;
     private final JavaPlugin plugin;
-    private final Permission permission;
     private final NotificationBus bus;
 
-    public StaffProtectImpl(
-            final @NotNull JavaPlugin plugin,
-            final @NotNull Permission permission,
-            final @NotNull NotificationBus bus) {
+    public StaffProtectImpl(final @NotNull JavaPlugin plugin, final @NotNull NotificationBus bus) {
         this.plugin = plugin;
-        this.permission = permission;
         this.bus = bus;
         this.addonManager = new AddonManagerImpl(this);
         this.commandRegisterer = new CommandRegistererImpl(this, Bukkit.getName());
         this.sender = new SenderImpl(this);
-    }
-
-
-    @Override
-    public @NotNull Permission getPermission() {
-        return permission;
     }
 
     @Override

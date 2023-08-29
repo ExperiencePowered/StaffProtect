@@ -1,10 +1,8 @@
 package net.experience.powered.staffprotect;
 
 import net.experience.powered.staffprotect.commands.StaffProtectCommand;
-import net.experience.powered.staffprotect.hooks.LuckPermsHook;
 import net.experience.powered.staffprotect.impl.AddonManagerImpl;
 import net.experience.powered.staffprotect.impl.StaffProtectImpl;
-import net.experience.powered.staffprotect.interfaces.Permission;
 import net.experience.powered.staffprotect.listeners.InventoryListener;
 import net.experience.powered.staffprotect.listeners.PlayerListener;
 import net.experience.powered.staffprotect.notification.NotificationBus;
@@ -25,7 +23,6 @@ public final class StaffProtectPlugin extends JavaPlugin {
     private Metrics metrics;
     private VersionController versionController;
     private StaffProtect api;
-    private Permission permission = new Permission() {};
 
     @Override
     public void onEnable() {
@@ -40,9 +37,6 @@ public final class StaffProtectPlugin extends JavaPlugin {
 
         if (!new File(getDataFolder(), "config.yml").exists()) {
             saveResource("config.yml", false);
-        }
-        if (Bukkit.getPluginManager().isPluginEnabled("LuckPerms")) {
-            this.permission = new LuckPermsHook();
         }
 
         api = getStaffProtectAPI();
@@ -87,7 +81,7 @@ public final class StaffProtectPlugin extends JavaPlugin {
                 return Collections.unmodifiableList(subscribers);
             }
         };
-        final StaffProtect staffProtect = new StaffProtectImpl(this, permission, bus);
+        final StaffProtect staffProtect = new StaffProtectImpl(this, bus);
         new StaffProtectProvider(staffProtect);
         return staffProtect;
     }

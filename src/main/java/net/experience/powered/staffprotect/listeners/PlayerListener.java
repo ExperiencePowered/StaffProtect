@@ -29,7 +29,7 @@ public class PlayerListener implements Listener {
     public void PlayerJoin(final @NotNull PlayerJoinEvent e) {
         final Player player = e.getPlayer();
         final UUID uuid = player.getUniqueId();
-        if (api.getPermission().hasPermission(uuid, "staffprotect.notification")) {
+        if (player.hasPermission("staffprotect.notification")) {
             api.getNotificationBus().subscribe(uuid);
         }
     }
