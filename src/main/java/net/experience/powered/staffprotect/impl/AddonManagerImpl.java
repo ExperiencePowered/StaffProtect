@@ -190,6 +190,8 @@ public class AddonManagerImpl implements AddonManager {
     public void disable(final @NotNull AbstractAddon addon) {
         addon.setLoadingState(AddonManagerImpl.class, AbstractAddon.LoadingState.DISABLED);
         addon.onDisable();
+        addon.getListeners().forEach(addon::unregisterListener);
+        addon.getCommands().forEach(addon::unregisterCommand);
         logger.info("Disabled addon " + addon + " v" + addon.getAddonFile().pluginVersion());
     }
 
