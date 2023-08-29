@@ -1,4 +1,9 @@
 # Any message in this config is following MiniMessage format, for more, please head to https://docs.advntr.dev/minimessage/format.html
+zoneId: ""
+# If you wish to change timezone (for example if you have server in other country),
+# write it there, otherwise leave "" for system's timezone
+# Search for timezones here https://timezonedb.com/time-zones
+# Example of valid timezone is Europe/Prague
 notification:
   creative-tracking:
     message: "<red>Player <blue><player> <red>has clicked on item <gold><item></gold> in CREATIVE mode."

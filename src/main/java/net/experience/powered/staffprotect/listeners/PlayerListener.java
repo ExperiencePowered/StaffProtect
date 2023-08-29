@@ -2,9 +2,11 @@ package net.experience.powered.staffprotect.listeners;
 
 import net.experience.powered.staffprotect.StaffProtect;
 import net.experience.powered.staffprotect.StaffProtectPlugin;
-import net.experience.powered.staffprotect.impl.SenderImpl;
+import net.experience.powered.staffprotect.notification.NotificationManager;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
+import org.bukkit.configuration.Configuration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -44,11 +46,10 @@ public class PlayerListener implements Listener {
     @EventHandler
     public void PlayerCommandExecute(final @NotNull PlayerCommandPreprocessEvent e) {
         final Player player = e.getPlayer();
-        final var configuration = plugin.getConfig();
-        final var string = configuration.getString("notification.command-executed", "String not found.");
-        final var miniMessage = MiniMessage.miniMessage();
-        final var component = miniMessage.deserialize(string, Placeholder.parsed("player", player.getName()), Placeholder.parsed("command", e.getMessage()));
-        final var sender = new SenderImpl(api, api.getNotificationBus().getSubscribers());
-        sender.sendMessage(component);
+        final Configuration configuration = plugin.getConfig();
+        final String string = configuration.getString("notification.command-executed", "String not found.");
+        final MiniMessage miniMessage = MiniMessage.miniMessage();
+        final Component component = miniMessage.deserialize(string, Placeholder.parsed("player", player.getName()), Placeholder.parsed("command", e.getMessage()));
+        NotificationManager.getInstance().sendMessage(player.getName(), component);
     }
 }
