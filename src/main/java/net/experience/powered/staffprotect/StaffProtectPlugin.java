@@ -90,8 +90,10 @@ public final class StaffProtectPlugin extends JavaPlugin {
     @Override
     public void onDisable() {
         final RecordFile recordFile = RecordFile.getInstance();
-        recordFile.writeRecord(new Record(System.currentTimeMillis(), "Sever", "StaffProtect was disabled."));
-        recordFile.writeRecord(new Record(System.currentTimeMillis(), "StaffProtect", "Saved file."));
+        if (recordFile != null) {
+            recordFile.writeRecord(new Record(System.currentTimeMillis(), "Sever", "StaffProtect was disabled."));
+            recordFile.writeRecord(new Record(System.currentTimeMillis(), "StaffProtect", "Saved file."));
+        }
 
         metrics.shutdown();
         if (api == null) return;
@@ -124,9 +126,8 @@ public final class StaffProtectPlugin extends JavaPlugin {
         return staffProtect;
     }
 
-    @NotNull
-    private NotificationManager getNotificationManager() {
-        return new NotificationManager(this, api.getNotificationBus()) {
+    private void getNotificationManager() {
+        new NotificationManager(this, api.getNotificationBus()) {
             @Override
             public void sendMessage(final @Nullable String player, final @NotNull Component component) {
                 final BukkitAudiences audience = BukkitAudiences.create(api.getPlugin());
