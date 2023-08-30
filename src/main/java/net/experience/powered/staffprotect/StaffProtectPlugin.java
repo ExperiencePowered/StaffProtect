@@ -3,10 +3,12 @@ package net.experience.powered.staffprotect;
 import net.experience.powered.staffprotect.commands.StaffProtectCommand;
 import net.experience.powered.staffprotect.impl.AddonManagerImpl;
 import net.experience.powered.staffprotect.impl.StaffProtectImpl;
+import net.experience.powered.staffprotect.impl.SubscriberImpl;
 import net.experience.powered.staffprotect.listeners.InventoryListener;
 import net.experience.powered.staffprotect.listeners.PlayerListener;
 import net.experience.powered.staffprotect.notification.NotificationBus;
 import net.experience.powered.staffprotect.notification.NotificationManager;
+import net.experience.powered.staffprotect.notification.Subscriber;
 import net.experience.powered.staffprotect.records.Record;
 import net.experience.powered.staffprotect.records.RecordFile;
 import net.experience.powered.staffprotect.util.Counter;
@@ -104,21 +106,46 @@ public final class StaffProtectPlugin extends JavaPlugin {
     private StaffProtect getStaffProtectAPI() {
         final NotificationBus bus = new NotificationBus() {
 
-            private final List<UUID> subscribers = new ArrayList<>();
+            private final List<Subscriber> subscribers = new ArrayList<>();
 
             @Override
             public void subscribe(final @NotNull UUID uuid) {
-                subscribers.add(uuid);
+                subscribers.add(new SubscriberImpl(uuid));
             }
 
             @Override
             public void unsubscribe(final @NotNull UUID uuid) {
-                subscribers.remove(uuid);
+                Subscriber subscriber = null;
+                for (Subscriber sub : subscribers) {
+                    if (sub.getUniqueId().equals(uuid)) {
+                        subscriber = sub;
+                    }
+                }
+                if (subscriber != null) {
+                    subscribers.remove(new SubscriberImpl(uuid));
+                }
             }
 
             @Override
             public @NotNull @UnmodifiableView List<UUID> getSubscribers() {
-                return Collections.unmodifiableList(subscribers);
+                final List<UUID> legacy = new ArrayList<>();
+                subscribers.forEach(subscriber -> legacy.add(subscriber.getUniqueId()));
+                return Collections.unmodifiableList(legacy);
+            }
+
+            @Override
+            public void subscribe(@NotNull Subscriber subscriber) {
+                subscribers.add(subscriber);
+            }
+
+            @Override
+            public void unsubscribe(@NotNull Subscriber subscriber) {
+                subscribers.remove(subscriber);
+            }
+
+            @Override
+            public @NotNull List<Subscriber> getModernSubscribers() {
+                return subscribers;
             }
         };
         final StaffProtect staffProtect = new StaffProtectImpl(this, bus);

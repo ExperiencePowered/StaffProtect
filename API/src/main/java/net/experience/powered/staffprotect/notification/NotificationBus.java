@@ -24,6 +24,25 @@ public interface NotificationBus {
     /**
      * List of subscribers
      * @return list of subscribers
+     * @deprecated in favour of {@link #getModernSubscribers()}
      */
     @NotNull List<UUID> getSubscribers();
+
+    /**
+     * Subscribes player to notifications
+     * @param subscriber subscriber
+     */
+    void subscribe(final @NotNull Subscriber subscriber);
+
+    /**
+     * Unsubscribes player to notifications
+     * @param subscriber subscriber
+     */
+    void unsubscribe(final @NotNull Subscriber subscriber);
+
+    /**
+     * List of subscribers
+     * @return list of subscribers
+     */
+    @NotNull List<Subscriber> getModernSubscribers();
 }
