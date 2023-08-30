@@ -3,11 +3,8 @@ package net.experience.powered.staffprotect.records
 import java.io.File
 import java.io.FileReader
 import java.io.FileWriter
-import java.nio.file.Files
-import java.nio.file.Path
 import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.collections.ArrayList
 
 class Record(private var time: Long, player: String, content: String) {
 
