@@ -43,4 +43,4 @@ it works similar to JavaPlugin class, although addons have one global config use
 although you can still make your own config, is it not recommended and not supported. To schedule anything,
 use MinecraftScheduler (```getScheduler()``` in main class), to register listener or command, you have methods like
 ```registerCommand(MinecraftCommand)``` and else..
-### Also dont forget, you need to rename plugin.yml to addon.yml, look for more on example addon
+### Also dont forget, you need to rename plugin.yml to addon.yml, look for more on example addon - https://github.com/ExperiencePowered/Example-Addon
