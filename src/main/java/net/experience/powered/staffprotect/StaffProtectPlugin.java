@@ -83,7 +83,7 @@ public final class StaffProtectPlugin extends JavaPlugin {
             }
         }
         final RecordFile recordFile = new RecordFile(file);
-        recordFile.writeRecord(new Record(System.currentTimeMillis(), "Sever", "StaffProtect was enabled."));
+        recordFile.writeRecord(new Record(System.currentTimeMillis(), "Server", "StaffProtect was enabled."));
 
         metrics = new Metrics(this, 19629);
         metrics.addCustomChart(new Metrics.SingleLineChart("amount_of_addons", () -> api.getAddonManager().getAddons().size()));
@@ -93,7 +93,7 @@ public final class StaffProtectPlugin extends JavaPlugin {
     public void onDisable() {
         final RecordFile recordFile = RecordFile.getInstance();
         if (recordFile != null) {
-            recordFile.writeRecord(new Record(System.currentTimeMillis(), "Sever", "StaffProtect was disabled."));
+            recordFile.writeRecord(new Record(System.currentTimeMillis(), "Server", "StaffProtect was disabled."));
             recordFile.writeRecord(new Record(System.currentTimeMillis(), "StaffProtect", "Saved file."));
         }
 
