@@ -1,17 +1,24 @@
-package net.experience.powered.staffprotect;
+package net.experience.powered.spigot;
 
-import net.experience.powered.staffprotect.commands.StaffProtectCommand;
-import net.experience.powered.staffprotect.impl.AddonManagerImpl;
-import net.experience.powered.staffprotect.impl.StaffProtectImpl;
-import net.experience.powered.staffprotect.impl.SubscriberImpl;
-import net.experience.powered.staffprotect.listeners.InventoryListener;
-import net.experience.powered.staffprotect.listeners.PlayerListener;
+import com.zaxxer.hikari.HikariConfig;
+import net.experience.powered.spigot.commands.StaffProtectCommand;
+import net.experience.powered.spigot.database.AbstractDatabase;
+import net.experience.powered.spigot.database.SQLite;
+import net.experience.powered.spigot.impl.AddonManagerImpl;
+import net.experience.powered.spigot.impl.StaffProtectImpl;
+import net.experience.powered.staffprotect.StaffProtect;
+import net.experience.powered.staffprotect.StaffProtectProvider;
+import net.experience.powered.spigot.impl.SubscriberImpl;
+import net.experience.powered.spigot.listeners.InventoryListener;
+import net.experience.powered.spigot.listeners.PlayerListener;
 import net.experience.powered.staffprotect.notification.NotificationBus;
 import net.experience.powered.staffprotect.notification.NotificationManager;
 import net.experience.powered.staffprotect.notification.Subscriber;
 import net.experience.powered.staffprotect.records.Record;
 import net.experience.powered.staffprotect.records.RecordFile;
 import net.experience.powered.staffprotect.util.Counter;
+import net.experience.powered.spigot.utils.Metrics;
+import net.experience.powered.spigot.impl.VerificationImpl;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
@@ -33,6 +40,7 @@ import java.util.*;
 
 public final class StaffProtectPlugin extends JavaPlugin {
 
+    private AbstractDatabase database;
     private Metrics metrics;
     private VersionController versionController;
     private StaffProtect api;
@@ -56,6 +64,27 @@ public final class StaffProtectPlugin extends JavaPlugin {
         getNotificationManager();
         Bukkit.getServicesManager().register(StaffProtect.class, api, this, ServicePriority.Normal);
         ((AddonManagerImpl) api.getAddonManager()).enableAddons();
+
+        final HikariConfig config = new HikariConfig();
+        final String databaseType = getConfig().getString("database.type", "SQLite");
+        if (databaseType.equalsIgnoreCase("SQLite")) {
+            final File databaseFile = new File(getDataFolder(), "Database.db");
+            if (!databaseFile.exists()) {
+                try {
+                    databaseFile.createNewFile();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            this.database = new SQLite(config, databaseFile);
+        }
+        else if (databaseType.equalsIgnoreCase("MySQL")) {
+
+        }
+        else {
+            throw new IllegalStateException("This database type : " + databaseType + " does not exist.");
+        }
+        database.connect();
 
         final PluginManager pluginManager = Bukkit.getPluginManager();
         pluginManager.registerEvents(new InventoryListener(api), this);
@@ -87,6 +116,8 @@ public final class StaffProtectPlugin extends JavaPlugin {
 
         metrics = new Metrics(this, 19629);
         metrics.addCustomChart(new Metrics.SingleLineChart("amount_of_addons", () -> api.getAddonManager().getAddons().size()));
+
+        new VerificationImpl();
     }
 
     @Override
@@ -167,5 +198,9 @@ public final class StaffProtectPlugin extends JavaPlugin {
                 RecordFile.getInstance().writeRecord(new Record(System.currentTimeMillis(), player == null ? "Anonymous" : player, string));
             }
         };
+    }
+
+    public AbstractDatabase getDatabase() {
+        return database;
     }
 }

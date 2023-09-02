@@ -4,6 +4,31 @@ zoneId: ""
 # write it there, otherwise leave "" for system's timezone
 # Search for timezones here https://timezonedb.com/time-zones
 # Example of valid timezone is Europe/Prague
+database:
+  type: "SQLite"
+  # Use if you have only one server, otherwise we recommend using MySQL,
+  # so you don't have to have one entry for every server in authenticator
+staff-verification:
+  enabled: true
+  # Can be disabled as not everyone wants to scan qr code
+  # Even though this is open-source plugin, and it would be digging own grave
+  # Putting malicious qr code here, we still place option to disable it
+  permission: "group.staff"
+  # Permission which people will have if they are staff
+  # This will automatically add next protection layer in case someone want to log on their account
+  messages:
+    prompt-to-verify: "<red>Hello <blue><player></blue>, seems like you are Staff, please verify with your code from Authenticator app."
+    first-verify: "<red>Hello <blue><player></blue>, since you are Staff, please scan this QR code and save it into your Authenticator app, if you have issues with loading QR code, you can <green><hover:show_text:'<gold>Click to copy secret key!'><click:COPY_TO_CLIPBOARD:'<secretkey>'>reveal secret key</click></hover></green>."
+    authorized: "<gold>Welcome on <server>."
+    failed-to-authorize: "<red>Failed to authorize you."
+    invalid-code: "<red>Your code is invalid, please write all numbers without spaces."
+    time-expired: "<red>Your authorizing took too long."
+  qr-code:
+    time-out: 60
+    # The time (in seconds) player has before he will be kicked because he did not verify
+    slot: 4
+    server-name: "ExampleServer"
+    # When setting up issuer, this will be added
 notification:
   creative-tracking:
     message: "<red>Player <blue><player> <red>has clicked on item <gold><item></gold> in CREATIVE mode."
@@ -15,7 +40,10 @@ notification:
       # Stay uppercase, if any of the keys are lowercase, it won't work,
       # If material name has space instead of space replace it with _
       # This is meant just to key, value ("<purple>CORRUPTED DIRT") can be with spaces
-  command-executed: "<red>Player <blue><player></blue> executed command <gold><command></gold>."
+  command:
+    executed: "<red>Player <blue><player></blue> executed command <gold><command></gold>."
+    blocked-reasons:
+      unauthorized-access: "<red>You need to verify yourself before accessing commands!"
 commands:
   insufficient-permissions: "<red>You do not have enough permissions to continue."
   reloaded-config: "<gold>Reloaded config.yml."

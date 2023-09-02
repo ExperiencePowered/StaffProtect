@@ -1,4 +1,14 @@
+buildscript {
+    ext.kotlin_version = '1.9.10'
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
+}
 plugins {
+    id 'org.jetbrains.kotlin.jvm' version '1.9.10'
     id 'com.palantir.git-version' version '3.0.0'
     id 'xyz.jpenilla.run-paper' version '2.1.0'
     id 'com.github.johnrengelman.shadow' version '8.1.1'
@@ -7,7 +17,7 @@ plugins {
 
 shadowJar {
     minimize()
-    relocate 'space.arim.morepaperlib', 'net.experience.powered.staffprotect.space.arim.morepaperlib'
+    relocate 'com.warrenstrange', 'net.experience.powered.staffprotect.com.warrenstrange'
     dependsOn("createProperties")
 }
 
@@ -38,9 +48,13 @@ dependencies {
     implementation("net.kyori:adventure-text-serializer-legacy:4.13.1")
     implementation("net.kyori:adventure-text-serializer-plain:4.14.0")
     implementation("net.kyori:adventure-text-minimessage:4.13.1")
+    implementation("com.zaxxer:HikariCP:5.0.1")
+    implementation("com.google.zxing:javase:3.5.1")
     implementation(project(":API"))
+    implementation("com.warrenstrange:googleauth:1.5.0")
     compileOnly("org.spigotmc:spigot-api:1.20-R0.1-SNAPSHOT")
     compileOnly("org.jetbrains:annotations:24.0.0")
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
 }
 
 subprojects {
@@ -65,8 +79,6 @@ subprojects {
 def targetJavaVersion = 17
 java {
     def javaVersion = JavaVersion.toVersion(targetJavaVersion)
-    sourceCompatibility = javaVersion
-    targetCompatibility = javaVersion
     if (JavaVersion.current() < javaVersion) {
         toolchain.languageVersion = JavaLanguageVersion.of(targetJavaVersion)
     }
@@ -107,4 +119,7 @@ tasks.register('createProperties') {
             into "bin/main/"
         }
     }
+}
+kotlin {
+    jvmToolchain(17)
 }

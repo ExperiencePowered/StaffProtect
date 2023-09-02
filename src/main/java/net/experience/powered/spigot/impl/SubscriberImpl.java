@@ -1,4 +1,4 @@
-package net.experience.powered.staffprotect.impl;
+package net.experience.powered.spigot.impl;
 
 import net.experience.powered.staffprotect.notification.Subscriber;
 import org.jetbrains.annotations.NotNull;

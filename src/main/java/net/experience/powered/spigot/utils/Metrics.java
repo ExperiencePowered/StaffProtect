@@ -1,4 +1,4 @@
-package net.experience.powered.staffprotect.utils;
+package net.experience.powered.spigot.utils;
 /*
  * This Metrics class was auto-generated and can be copied into your project if you are
  * not using a build tool like Gradle or Maven for dependency management.
