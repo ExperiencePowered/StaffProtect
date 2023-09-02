@@ -17,6 +17,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.player.*;
 import org.jetbrains.annotations.NotNull;
 
@@ -156,6 +157,23 @@ public class PlayerListener implements Listener {
             return;
         }
         if (!VerificationImpl.getInstance().isAuthorized(player)) {
+            e.setCancelled(true);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGH)
+    public void PlayerPickupItem(final @NotNull EntityPickupItemEvent e) {
+        if (!(e.getEntity() instanceof Player player)) {
+            return;
+        }
+        if (!VerificationImpl.getInstance().isAuthorized(player)) {
+            e.setCancelled(true);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGH)
+    public void PlayerPickupItem(final @NotNull PlayerDropItemEvent e) {
+        if (!VerificationImpl.getInstance().isAuthorized(e.getPlayer())) {
             e.setCancelled(true);
         }
     }
