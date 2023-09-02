@@ -1,4 +1,4 @@
 name: StaffProtect
 version: '${version}'
-main: net.experience.powered.staffprotect.StaffProtectPlugin
+main: net.experience.powered.staffprotect.spigot.StaffProtectPlugin
 api-version: '1.20'
