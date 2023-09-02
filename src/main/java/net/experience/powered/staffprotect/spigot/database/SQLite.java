@@ -1,4 +1,4 @@
-package net.experience.powered.spigot.database;
+package net.experience.powered.staffprotect.spigot.database;
 
 import com.zaxxer.hikari.HikariConfig;
 import org.jetbrains.annotations.NotNull;

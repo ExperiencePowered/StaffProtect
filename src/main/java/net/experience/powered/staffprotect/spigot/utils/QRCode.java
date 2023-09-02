@@ -1,11 +1,11 @@
-package net.experience.powered.spigot.utils;
+package net.experience.powered.staffprotect.spigot.utils;
 
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.WriterException;
 import com.google.zxing.client.j2se.MatrixToImageWriter;
 import com.google.zxing.common.BitMatrix;
-import net.experience.powered.spigot.impl.QRPlayerImpl;
+import net.experience.powered.staffprotect.spigot.impl.QRPlayerImpl;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;

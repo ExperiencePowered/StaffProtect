@@ -1,7 +1,7 @@
-package net.experience.powered.spigot.utils;
+package net.experience.powered.staffprotect.spigot.utils;
 
-import net.experience.powered.spigot.StaffProtectPlugin;
-import net.experience.powered.spigot.impl.VerificationImpl;
+import net.experience.powered.staffprotect.spigot.StaffProtectPlugin;
+import net.experience.powered.staffprotect.spigot.impl.VerificationImpl;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;

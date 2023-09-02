@@ -1,10 +1,10 @@
-package net.experience.powered.spigot.commands;
+package net.experience.powered.staffprotect.spigot.commands;
 
 import net.experience.powered.staffprotect.StaffProtect;
 import net.experience.powered.staffprotect.addons.AbstractAddon;
 import net.experience.powered.staffprotect.addons.GlobalConfiguration;
-import net.experience.powered.spigot.impl.AddonManagerImpl;
-import net.experience.powered.spigot.impl.SenderImpl;
+import net.experience.powered.staffprotect.spigot.impl.AddonManagerImpl;
+import net.experience.powered.staffprotect.spigot.impl.SenderImpl;
 import net.experience.powered.staffprotect.notification.NotificationBus;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;

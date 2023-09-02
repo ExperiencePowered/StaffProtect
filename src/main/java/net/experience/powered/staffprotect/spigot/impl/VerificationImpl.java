@@ -1,11 +1,11 @@
-package net.experience.powered.spigot.impl;
+package net.experience.powered.staffprotect.spigot.impl;
 
 import com.warrenstrange.googleauth.GoogleAuthenticator;
 import com.warrenstrange.googleauth.GoogleAuthenticatorKey;
-import net.experience.powered.spigot.StaffProtectPlugin;
-import net.experience.powered.spigot.database.AbstractDatabase;
-import net.experience.powered.spigot.utils.Expiring;
-import net.experience.powered.spigot.utils.QRCode;
+import net.experience.powered.staffprotect.spigot.StaffProtectPlugin;
+import net.experience.powered.staffprotect.spigot.database.AbstractDatabase;
+import net.experience.powered.staffprotect.spigot.utils.Expiring;
+import net.experience.powered.staffprotect.spigot.utils.QRCode;
 import net.experience.powered.staffprotect.verifications.Verification;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;

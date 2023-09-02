@@ -1,4 +1,4 @@
-package net.experience.powered.spigot.impl;
+package net.experience.powered.staffprotect.spigot.impl;
 
 import net.experience.powered.staffprotect.addons.AddonFile;
 import org.jetbrains.annotations.Contract;

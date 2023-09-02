@@ -1,8 +1,8 @@
-package net.experience.powered.spigot.listeners;
+package net.experience.powered.staffprotect.spigot.listeners;
 
-import net.experience.powered.spigot.StaffProtectPlugin;
-import net.experience.powered.spigot.impl.SenderImpl;
-import net.experience.powered.spigot.impl.VerificationImpl;
+import net.experience.powered.staffprotect.spigot.StaffProtectPlugin;
+import net.experience.powered.staffprotect.spigot.impl.SenderImpl;
+import net.experience.powered.staffprotect.spigot.impl.VerificationImpl;
 import net.experience.powered.staffprotect.StaffProtect;
 import net.experience.powered.staffprotect.events.PlayerPreVerifyEvent;
 import net.experience.powered.staffprotect.events.PlayerVerifyEvent;

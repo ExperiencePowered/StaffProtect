@@ -1,4 +1,4 @@
-package net.experience.powered.spigot;
+package net.experience.powered.staffprotect.spigot;
 
 import org.jetbrains.annotations.NotNull;
 
