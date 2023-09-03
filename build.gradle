@@ -25,9 +25,6 @@ tasks {
     runServer {
         minecraftVersion("1.20.1")
     }
-    runWaterfall {
-        waterfallVersion("1.20")
-    }
 }
 
 group = 'net.experience.powered'
