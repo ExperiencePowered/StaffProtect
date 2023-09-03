@@ -21,8 +21,6 @@ import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.player.*;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.UUID;
-
 import static net.kyori.adventure.text.format.NamedTextColor.*;
 
 public class PlayerListener implements Listener {
@@ -38,10 +36,6 @@ public class PlayerListener implements Listener {
     @EventHandler
     public void PlayerJoin(final @NotNull PlayerJoinEvent e) {
         final Player player = e.getPlayer();
-        final UUID uuid = player.getUniqueId();
-        if (player.hasPermission("staffprotect.notification")) {
-            api.getNotificationBus().subscribe(uuid);
-        }
         final boolean verification = plugin.getConfig().getBoolean("staff-verification.enabled", true);
         if (verification && player.hasPermission(plugin.getConfig().getString("staff-verification.permission", "group.staff")) || player.isOp()) {
             VerificationImpl.getInstance().start(player);
@@ -82,6 +76,10 @@ public class PlayerListener implements Listener {
                             .append(Component.text(player.getName(), BLUE))
                             .append(Component.text(".", RED));
                     NotificationManager.getInstance().sendMessage(player.getName(), component);
+
+                    if (player.hasPermission("staffprotect.notification")) {
+                        api.getNotificationBus().subscribe(player.getUniqueId());
+                    }
                 }
                 else {
                     verifyEvent = new PlayerVerifyEvent(player, code, false);
@@ -103,8 +101,7 @@ public class PlayerListener implements Listener {
     @EventHandler
     public void PlayerQuit(final @NotNull PlayerQuitEvent e) {
         final Player player = e.getPlayer();
-        final UUID uuid = player.getUniqueId();
-        api.getNotificationBus().unsubscribe(uuid);
+        api.getNotificationBus().subscribe(player.getUniqueId());
         if (!VerificationImpl.getInstance().isAuthorized(player)) {
             VerificationImpl.getInstance().end(player);
         }
@@ -113,11 +110,24 @@ public class PlayerListener implements Listener {
     @EventHandler
     public void PlayerCommandExecute(final @NotNull PlayerCommandPreprocessEvent e) {
         final Player player = e.getPlayer();
-
-
-        final String string = plugin.getConfig().getString("notification.command.executed", "String not found.");
-        final Component component =  MiniMessage.miniMessage().deserialize(string,
-                Placeholder.parsed("player", player.getName()), Placeholder.parsed("command", e.getMessage()));
+        if (!VerificationImpl.getInstance().isAuthorized(player)) {
+            final String fallback = "<red>You need to verify yourself before accessing commands!";
+            SenderImpl.getInstance(player).sendMessage(MiniMessage.miniMessage().deserialize(plugin.getConfig().getString("notification.command.blocked-reasons.unauthorized-access", fallback),
+                    Placeholder.parsed("player", player.getName()),
+                    Placeholder.parsed("command", e.getMessage())));
+            final Component component = Component.text("Staff ", RED)
+                            .append(Component.text(player.getName(), BLUE))
+                            .append(Component.text(" tried to access command ", RED))
+                            .append(Component.text(e.getMessage(), GOLD))
+                            .append(Component.text(".", RED));
+            NotificationManager.getInstance().sendMessage(player.getName(), component);
+            e.setCancelled(true);
+            return;
+        }
+        final String fallback = "<red>Player <blue><player></blue> executed command <gold><command></gold>.";
+        final Component component =  MiniMessage.miniMessage().deserialize(plugin.getConfig().getString("notification.command.executed", fallback),
+                Placeholder.parsed("player", player.getName()),
+                Placeholder.parsed("command", e.getMessage()));
         NotificationManager.getInstance().sendMessage(player.getName(), component);
     }
 

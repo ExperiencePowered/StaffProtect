@@ -9,12 +9,11 @@ import net.experience.powered.staffprotect.spigot.utils.QRCode;
 import net.experience.powered.staffprotect.verifications.Verification;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
-import org.bukkit.scheduler.BukkitTask;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.PreparedStatement;
@@ -30,7 +29,7 @@ public class VerificationImpl extends Verification {
     private final StaffProtectPlugin plugin;
     private final AbstractDatabase database;
 
-    private BukkitTask timeOut;
+    private BukkitRunnable timeOut;
 
     public VerificationImpl() {
         this.plugin = StaffProtectPlugin.getPlugin(StaffProtectPlugin.class);
@@ -87,7 +86,7 @@ public class VerificationImpl extends Verification {
                 SenderImpl.getInstance(player).sendMessage(MiniMessage.miniMessage().deserialize(plugin.getConfig().getString("staff-verification.messages.prompt-to-verify", fallback),
                         Placeholder.parsed("player", player.getName())));
             }
-            timeOut = Bukkit.getScheduler().runTaskTimer(plugin, new Expiring(timeOut, player, this), 20L, 20L);
+            timeOut = new Expiring(player, this);
             QRCode.getCodes().put(player.getUniqueId(), qrPlayer);
         }).exceptionally(throwable -> {
             throw new RuntimeException(throwable);
@@ -96,9 +95,14 @@ public class VerificationImpl extends Verification {
 
     @Override
     public void end(final @NotNull Player player) {
-        final ItemStack itemStack = QRCode.getPreviousItem().get(player.getUniqueId());
-        if (QRCode.getPreviousItem().containsKey(player.getUniqueId()) && itemStack != null && itemStack.getType() != Material.AIR) {
-            player.getInventory().setItem(SLOT, itemStack);
+        if (QRCode.getPreviousItem().containsKey(player.getUniqueId())) {
+            final ItemStack itemStack = QRCode.getPreviousItem().getOrDefault(player.getUniqueId(), new ItemStack(Material.AIR));
+            if (itemStack == null || itemStack.getType() == Material.AIR) {
+                player.getInventory().setItem(SLOT, new ItemStack(Material.AIR));
+            }
+            else {
+                player.getInventory().setItem(SLOT, itemStack);
+            }
         }
         QRCode.getCodes().remove(player.getUniqueId());
         QRCode.getPreviousItem().remove(player.getUniqueId());
@@ -110,18 +114,8 @@ public class VerificationImpl extends Verification {
         final QRPlayerImpl qrPlayer = QRCode.getCodes().get(player.getUniqueId());
         boolean result = gAuth.authorize(qrPlayer.getSecretKey(), code);
         if (result) {
-            if (QRCode.getPreviousItem().containsKey(player.getUniqueId())) {
-                final ItemStack itemStack = QRCode.getPreviousItem().getOrDefault(player.getUniqueId(), new ItemStack(Material.AIR));
-                if (itemStack == null || itemStack.getType() == Material.AIR) {
-                    player.getInventory().setItem(SLOT, new ItemStack(Material.AIR));
-                }
-                else {
-                    player.getInventory().setItem(SLOT, itemStack);
-                }
-            }
-            QRCode.getCodes().remove(player.getUniqueId());
-            QRCode.getPreviousItem().remove(player.getUniqueId());
             end(player);
+            plugin.getMessageManager().sendAuthorization(player);
         }
         return result;
     }

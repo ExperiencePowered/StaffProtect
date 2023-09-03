@@ -1,24 +1,25 @@
 package net.experience.powered.staffprotect.spigot;
 
 import com.zaxxer.hikari.HikariConfig;
-import net.experience.powered.staffprotect.spigot.commands.StaffProtectCommand;
-import net.experience.powered.staffprotect.spigot.database.AbstractDatabase;
-import net.experience.powered.staffprotect.spigot.database.SQLite;
-import net.experience.powered.staffprotect.spigot.impl.AddonManagerImpl;
-import net.experience.powered.staffprotect.spigot.impl.StaffProtectImpl;
 import net.experience.powered.staffprotect.StaffProtect;
 import net.experience.powered.staffprotect.StaffProtectProvider;
-import net.experience.powered.staffprotect.spigot.impl.SubscriberImpl;
-import net.experience.powered.staffprotect.spigot.listeners.InventoryListener;
-import net.experience.powered.staffprotect.spigot.listeners.PlayerListener;
 import net.experience.powered.staffprotect.notification.NotificationBus;
 import net.experience.powered.staffprotect.notification.NotificationManager;
 import net.experience.powered.staffprotect.notification.Subscriber;
 import net.experience.powered.staffprotect.records.Record;
 import net.experience.powered.staffprotect.records.RecordFile;
-import net.experience.powered.staffprotect.util.Counter;
-import net.experience.powered.staffprotect.spigot.utils.Metrics;
+import net.experience.powered.staffprotect.spigot.commands.StaffProtectCommand;
+import net.experience.powered.staffprotect.spigot.database.AbstractDatabase;
+import net.experience.powered.staffprotect.spigot.database.SQLite;
+import net.experience.powered.staffprotect.spigot.impl.AddonManagerImpl;
+import net.experience.powered.staffprotect.spigot.impl.StaffProtectImpl;
+import net.experience.powered.staffprotect.spigot.impl.SubscriberImpl;
 import net.experience.powered.staffprotect.spigot.impl.VerificationImpl;
+import net.experience.powered.staffprotect.spigot.listeners.InventoryListener;
+import net.experience.powered.staffprotect.spigot.listeners.PlayerListener;
+import net.experience.powered.staffprotect.spigot.messages.PluginMessageManager;
+import net.experience.powered.staffprotect.spigot.utils.Metrics;
+import net.experience.powered.staffprotect.util.Counter;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
@@ -26,6 +27,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.plugin.messaging.Messenger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnmodifiableView;
@@ -40,6 +42,8 @@ import java.util.*;
 
 public final class StaffProtectPlugin extends JavaPlugin {
 
+    private static boolean bungee;
+    private PluginMessageManager messageManager;
     private AbstractDatabase database;
     private Metrics metrics;
     private VersionController versionController;
@@ -118,10 +122,27 @@ public final class StaffProtectPlugin extends JavaPlugin {
         metrics.addCustomChart(new Metrics.SingleLineChart("amount_of_addons", () -> api.getAddonManager().getAddons().size()));
 
         new VerificationImpl();
+
+        if (getServer().spigot().getConfig().getConfigurationSection("settings").getBoolean( "bungeecord")) {
+            this.messageManager = new PluginMessageManager();
+
+            final Messenger messenger = getServer().getMessenger();
+            messenger.registerIncomingPluginChannel(this, "staffprotect:bungee", messageManager);
+            messenger.registerOutgoingPluginChannel(this, "staffprotect:spigot");
+
+            StaffProtectPlugin.bungee = true;
+        }
+        else {
+            StaffProtectPlugin.bungee = false;
+        }
     }
 
     @Override
     public void onDisable() {
+        final Messenger messenger = getServer().getMessenger();
+        messenger.unregisterIncomingPluginChannel(this, "staffprotect:bungee");
+        messenger.unregisterOutgoingPluginChannel(this, "staffprotect:spigot");
+
         final RecordFile recordFile = RecordFile.getInstance();
         if (recordFile != null) {
             recordFile.writeRecord(new Record(System.currentTimeMillis(), "Server", "StaffProtect was disabled."));
@@ -198,6 +219,14 @@ public final class StaffProtectPlugin extends JavaPlugin {
                 RecordFile.getInstance().writeRecord(new Record(System.currentTimeMillis(), player == null ? "Anonymous" : player, string));
             }
         };
+    }
+
+    public static boolean isBungee() {
+        return bungee;
+    }
+
+    public PluginMessageManager getMessageManager() {
+        return messageManager;
     }
 
     public AbstractDatabase getDatabase() {

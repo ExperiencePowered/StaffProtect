@@ -25,6 +25,9 @@ tasks {
     runServer {
         minecraftVersion("1.20.1")
     }
+    runWaterfall {
+        waterfallVersion("1.20")
+    }
 }
 
 group = 'net.experience.powered'
@@ -40,11 +43,16 @@ repositories {
         name = "spigot-repo"
         url = "https://hub.spigotmc.org/nexus/content/repositories/snapshots/"
     }
+    maven {
+        name = "papermc-repo"
+        url = "https://repo.papermc.io/repository/maven-public/"
+    }
 }
 
 dependencies {
     implementation("net.kyori:adventure-api:4.3.0")
     implementation("net.kyori:adventure-platform-bukkit:4.3.0")
+    implementation("net.kyori:adventure-platform-bungeecord:4.3.0")
     implementation("net.kyori:adventure-text-serializer-legacy:4.13.1")
     implementation("net.kyori:adventure-text-serializer-plain:4.14.0")
     implementation("net.kyori:adventure-text-minimessage:4.13.1")
@@ -52,6 +60,7 @@ dependencies {
     implementation("com.google.zxing:javase:3.5.1")
     implementation(project(":API"))
     implementation("com.warrenstrange:googleauth:1.5.0")
+    compileOnly("io.github.waterfallmc:waterfall-api:1.19-R0.1-SNAPSHOT")
     compileOnly("org.spigotmc:spigot-api:1.20-R0.1-SNAPSHOT")
     compileOnly("org.jetbrains:annotations:24.0.0")
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
@@ -66,6 +75,10 @@ subprojects {
             name = "spigot-repo"
             url = "https://hub.spigotmc.org/nexus/content/groups/public/"
         }
+        maven {
+            name = "papermc-repo"
+            url = "https://repo.papermc.io/repository/maven-public/"
+        }
     }
 
     dependencies {
@@ -73,6 +86,7 @@ subprojects {
         implementation("net.kyori:adventure-platform-bukkit:4.3.0")
         implementation("org.jetbrains:annotations:24.0.0")
         compileOnly("org.spigotmc:spigot-api:1.20-R0.1-SNAPSHOT")
+        compileOnly("io.github.waterfallmc:waterfall-api:1.19-R0.1-SNAPSHOT")
     }
 }
 
@@ -94,7 +108,13 @@ processResources {
     def props = [version: version]
     inputs.properties props
     filteringCharset 'UTF-8'
-    filesMatching('plugin.yml') {
+    Iterable<String> iterable = new Iterable<String>() {
+        @Override
+        Iterator<String> iterator() {
+            return List.of("plugin.yml", "bungee.yml").iterator()
+        }
+    }
+    filesMatching(iterable) {
         expand props
     }
 }

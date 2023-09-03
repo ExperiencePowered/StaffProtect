@@ -1,0 +1,4 @@
+name: StaffProtectBungee
+main: net.experience.powered.staffprotect.waterfall.StaffProtectBungee
+author: "JakushCZ, Hitman"
+version: '${version}'
