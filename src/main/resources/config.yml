@@ -20,10 +20,7 @@ staff-verification:
     prompt-to-verify: "<red>Hello <blue><player></blue>, seems like you are Staff, please verify with your code from Authenticator app."
     first-verify: "<red>Hello <blue><player></blue>, since you are Staff, please scan this QR code and save it into your Authenticator app, if you have issues with loading QR code, you can <green><hover:show_text:'<gold>Click to copy secret key!'><click:COPY_TO_CLIPBOARD:'<secretkey>'>reveal secret key</click></hover></green>."
     authorized: "<gold>Welcome on <server>."
-    force-authorized: "<gold>You were force authorized."
-    # This message is sent, if man switches servers for example from Game to Lobby and whether Game has or not staffprotect
-    # If they were authorized once, they wll be automatically authorized, this message may be removed in future
-    # As this is bug that does not limit anyone
+    automatically-authorized: "<gold>You were automatically authorized."
     failed-to-authorize: "<red>Failed to authorize you."
     invalid-code: "<red>Your code is invalid, please write all numbers without spaces."
     time-expired: "<red>Your authorizing took too long."
