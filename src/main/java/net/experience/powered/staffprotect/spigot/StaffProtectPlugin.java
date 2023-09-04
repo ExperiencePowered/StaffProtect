@@ -127,8 +127,8 @@ public final class StaffProtectPlugin extends JavaPlugin {
             this.messageManager = new PluginMessageManager();
 
             final Messenger messenger = getServer().getMessenger();
-            messenger.registerIncomingPluginChannel(this, "staffprotect:bungee", messageManager);
-            messenger.registerOutgoingPluginChannel(this, "staffprotect:spigot");
+            messenger.registerIncomingPluginChannel(this, "staffprotect:spigot", messageManager);
+            messenger.registerOutgoingPluginChannel(this, "staffprotect:bungee");
 
             StaffProtectPlugin.bungee = true;
         }

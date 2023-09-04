@@ -11,6 +11,7 @@ import net.md_5.bungee.api.connection.Server;
 import net.md_5.bungee.api.event.PluginMessageEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
+import org.bukkit.Bukkit;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -27,7 +28,7 @@ public class PluginMessageManager implements Listener {
         String subChannel = in.readUTF();
         if (subChannel.equalsIgnoreCase( "authorized")) {
             if (e.getReceiver() instanceof ProxiedPlayer receiver) {
-                StaffProtectBungee.getInstance().getAuthorized().compute(receiver.getUniqueId(), (uuid, state) -> true);
+                StaffProtectBungee.getInstance().getAuthorized().put(receiver.getUniqueId(), true);
             }
         }
     }

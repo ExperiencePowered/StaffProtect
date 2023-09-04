@@ -62,10 +62,12 @@ public class PlayerListener implements Listener {
                 } catch (NumberFormatException ex) {
                     verifyEvent = new PlayerVerifyEvent(player, -1, false);
                     Bukkit.getPluginManager().callEvent(verifyEvent);
-                    player.sendMessage("Your code is invalid, please write all numbers without spaces.");
+                    final String fallback = "<red>Your code is invalid, please write all numbers without spaces.";
+                    SenderImpl.getInstance(player).sendMessage(MiniMessage.miniMessage().deserialize(plugin.getConfig().getString("staff-verification.messages.invalid-code", fallback)));
                     return;
                 }
 
+                e.setCancelled(true);
                 if (VerificationImpl.getInstance().authorize(player, code)) {
                     verifyEvent = new PlayerVerifyEvent(player, code, true);
                     final String fallback = "<gold>Welcome on <server>.";
@@ -101,7 +103,7 @@ public class PlayerListener implements Listener {
     @EventHandler
     public void PlayerQuit(final @NotNull PlayerQuitEvent e) {
         final Player player = e.getPlayer();
-        api.getNotificationBus().subscribe(player.getUniqueId());
+        api.getNotificationBus().unsubscribe(player.getUniqueId());
         if (!VerificationImpl.getInstance().isAuthorized(player)) {
             VerificationImpl.getInstance().end(player);
         }

@@ -35,7 +35,9 @@ public class PlayerListener implements Listener {
     @EventHandler
     public void onServerSwitch(final @NotNull ServerSwitchEvent e) {
         if (StaffProtectBungee.getInstance().getAuthorized().getOrDefault(e.getPlayer().getUniqueId(), false)) {
-            StaffProtectBungee.getInstance().getMessageManager().sendAuthorization(e.getPlayer(), e.getPlayer().getServer());
+            if (e.getFrom() != null) {
+                StaffProtectBungee.getInstance().getMessageManager().sendAuthorization(e.getPlayer(), e.getPlayer().getServer());
+            }
         }
     }
 
@@ -44,7 +46,8 @@ public class PlayerListener implements Listener {
         if (!(e.getSender() instanceof ProxiedPlayer player)) {
             return;
         }
-        if (StaffProtectBungee.getInstance().getAuthorized().getOrDefault(player.getUniqueId(), false)) {
+        final boolean isCommand = e.getMessage().startsWith("/");
+        if (isCommand && !StaffProtectBungee.getInstance().getAuthorized().getOrDefault(player.getUniqueId(), false)) {
             e.setCancelled(true);
             SenderImpl.getInstance(player).sendMessage(MiniMessage.miniMessage().deserialize(ProxyConfiguration.unauthorized_access));
         }

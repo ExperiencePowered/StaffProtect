@@ -24,6 +24,7 @@ public class StaffProtectBungee extends Plugin {
     public void onEnable() {
         StaffProtectBungee.instance = this;
         getProxy().registerChannel("staffprotect:bungee");
+        getProxy().registerChannel("staffprotect:spigot");
         messageManager = new PluginMessageManager();
         authorized = new HashMap<>();
 
@@ -34,43 +35,6 @@ public class StaffProtectBungee extends Plugin {
     @Override
     public void onDisable() {
         getProxy().getPluginManager().unregisterListeners(this);
-    }
-
-    public void saveResource(@NotNull String resourcePath, final boolean replace) {
-        Objects.requireNonNull(resourcePath, "ResourcePath cannot be null");
-        if (resourcePath.isEmpty()) {
-            throw new IllegalArgumentException("ResourcePath cannot be empty");
-        }
-        resourcePath = resourcePath.replace('\\', '/');
-        InputStream in = getResourceAsStream(resourcePath);
-        if (in == null) {
-            throw new IllegalArgumentException("The embedded resource '" + resourcePath + "' cannot be found in " + getFile());
-        }
-
-        File outFile = new File(getDataFolder(), resourcePath);
-        int lastIndex = resourcePath.lastIndexOf('/');
-        File outDir = new File(getDataFolder(), resourcePath.substring(0, Math.max(lastIndex, 0)));
-
-        if (!outDir.exists()) {
-            outDir.mkdirs();
-        }
-
-        try {
-            if (!outFile.exists() || replace) {
-                OutputStream out = new FileOutputStream(outFile);
-                byte[] buf = new byte[1024];
-                int len;
-                while ((len = in.read(buf)) > 0) {
-                    out.write(buf, 0, len);
-                }
-                out.close();
-                in.close();
-            } else {
-                getLogger().log(Level.WARNING, "Could not save " + outFile.getName() + " to " + outFile + " because " + outFile.getName() + " already exists.");
-            }
-        } catch (IOException ex) {
-            getLogger().log(Level.SEVERE, "Could not save " + outFile.getName() + " to " + outFile, ex);
-        }
     }
 
     public HashMap<UUID, Boolean> getAuthorized() {

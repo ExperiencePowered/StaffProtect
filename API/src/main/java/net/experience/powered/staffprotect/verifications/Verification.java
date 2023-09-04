@@ -14,6 +14,7 @@ public abstract class Verification {
     public abstract void start(final @NotNull Player player);
     public abstract void end(final @NotNull Player player);
     public abstract boolean authorize(final @NotNull Player player, int code);
+    public abstract void forceAuthorize(final @NotNull Player player);
     public abstract boolean isAuthorized(final @NotNull Player player);
 
     public static Verification getInstance() {
