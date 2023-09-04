@@ -10,6 +10,7 @@ import net.experience.powered.staffprotect.records.Record;
 import net.experience.powered.staffprotect.records.RecordFile;
 import net.experience.powered.staffprotect.spigot.commands.StaffProtectCommand;
 import net.experience.powered.staffprotect.spigot.database.AbstractDatabase;
+import net.experience.powered.staffprotect.spigot.database.MySQL;
 import net.experience.powered.staffprotect.spigot.database.SQLite;
 import net.experience.powered.staffprotect.spigot.impl.AddonManagerImpl;
 import net.experience.powered.staffprotect.spigot.impl.StaffProtectImpl;
@@ -87,7 +88,16 @@ public final class StaffProtectPlugin extends JavaPlugin {
             this.database = new SQLite(config, databaseFile);
         }
         else if (databaseType.equalsIgnoreCase("MySQL")) {
-
+            final String host = getConfig().getString("database.mysql.host", "127.0.0.1");
+            final int port = getConfig().getInt("database.mysql.port", 3306);
+            final String database = getConfig().getString("database.mysql.database", "db");
+            final String password = getConfig().getString("database.mysql.username", "root");
+            final String username = getConfig().getString("database.mysql.password", "");
+            final boolean useSSL = getConfig().getBoolean("database.mysql.useSSL", false);
+            config.setJdbcUrl("jdbc:mysql://" + host + ":" + port + "/" + database + "?useeSSL=" + useSSL);
+            config.setPassword(password);
+            config.setUsername(username);
+            this.database = new MySQL(config);
         }
         else {
             throw new IllegalStateException("This database type : " + databaseType + " does not exist.");

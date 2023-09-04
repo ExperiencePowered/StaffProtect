@@ -8,6 +8,13 @@ database:
   type: "SQLite"
   # Use if you have only one server, otherwise we recommend using MySQL,
   # so you don't have to have one entry for every server in authenticator
+  mysql:
+    host: "127.0.0.1"
+    port: 3306
+    database: "db"
+    username: "root"
+    password: ""
+    useSSL: true
 staff-verification:
   enabled: true
   # Can be disabled as not everyone wants to scan qr code
