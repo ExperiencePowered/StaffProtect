@@ -4,8 +4,7 @@ import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 import net.experience.powered.staffprotect.StaffProtect;
-import net.experience.powered.staffprotect.spigot.impl.VerificationImpl;
-import net.experience.powered.staffprotect.spigot.utils.QRCode;
+import net.experience.powered.staffprotect.spigot.utils.Authorizer;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.messaging.PluginMessageListener;
 import org.jetbrains.annotations.NotNull;
@@ -20,9 +19,7 @@ public class PluginMessageManager implements PluginMessageListener {
         ByteArrayDataInput in = ByteStreams.newDataInput(message);
         String subChannel = in.readUTF();
         if (subChannel.equalsIgnoreCase("authorized")) {
-            if (QRCode.getCodes().containsKey(player.getUniqueId())) {
-                VerificationImpl.getInstance().end(player);
-            }
+            new Authorizer(player);
         }
     }
 
