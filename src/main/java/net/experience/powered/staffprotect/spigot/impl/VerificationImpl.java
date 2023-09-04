@@ -2,13 +2,11 @@ package net.experience.powered.staffprotect.spigot.impl;
 
 import com.warrenstrange.googleauth.GoogleAuthenticator;
 import com.warrenstrange.googleauth.GoogleAuthenticatorKey;
-import net.experience.powered.staffprotect.StaffProtect;
 import net.experience.powered.staffprotect.spigot.StaffProtectPlugin;
 import net.experience.powered.staffprotect.spigot.database.AbstractDatabase;
 import net.experience.powered.staffprotect.spigot.utils.Expiring;
 import net.experience.powered.staffprotect.spigot.utils.QRCode;
 import net.experience.powered.staffprotect.verifications.Verification;
-import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.Material;
@@ -112,6 +110,9 @@ public class VerificationImpl extends Verification {
         final GoogleAuthenticator gAuth = new GoogleAuthenticator();
         final QRPlayerImpl qrPlayer = QRCode.getCodes().get(player.getUniqueId());
         boolean result = gAuth.authorize(qrPlayer.getSecretKey(), code);
+        if (isAuthorized(player)) {
+            return true;
+        }
         if (result) {
             end(player);
             plugin.getMessageManager().sendAuthorization(player);
@@ -123,11 +124,9 @@ public class VerificationImpl extends Verification {
     public void forceAuthorize(@NotNull Player player) {
         final GoogleAuthenticator gAuth = new GoogleAuthenticator();
         final QRPlayerImpl qrPlayer = QRCode.getCodes().get(player.getUniqueId());
-        authorize(player, gAuth.getTotpPassword(qrPlayer.getSecretKey()));
-
-        final String fallback = "<gold>You were force authorized.";
-        final Component component = MiniMessage.miniMessage().deserialize(plugin.getConfig().getString("staff-verification.messages.force-authorized", fallback));
-        SenderImpl.getInstance(player).sendMessage(component);
+        if (isAuthorized(player)) {
+            authorize(player, gAuth.getTotpPassword(qrPlayer.getSecretKey()));
+        }
     }
 
     @Override
