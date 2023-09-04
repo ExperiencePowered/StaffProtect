@@ -24,6 +24,7 @@ import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Bukkit;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -34,6 +35,8 @@ import org.jetbrains.annotations.UnmodifiableView;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.time.Clock;
 import java.time.Instant;
@@ -63,6 +66,7 @@ public final class StaffProtectPlugin extends JavaPlugin {
         if (!new File(getDataFolder(), "config.yml").exists()) {
             saveResource("config.yml", false);
         }
+        saveConfigDefaults();
 
         api = getStaffProtectAPI();
         getNotificationManager();
@@ -219,6 +223,22 @@ public final class StaffProtectPlugin extends JavaPlugin {
                 RecordFile.getInstance().writeRecord(new Record(System.currentTimeMillis(), player == null ? "Anonymous" : player, string));
             }
         };
+    }
+
+    public void saveConfigDefaults() {
+        try (InputStream inputStream = getResource("config.yml")) {
+            if (inputStream == null) {
+                return;
+            }
+            final YamlConfiguration configuration = YamlConfiguration.loadConfiguration(new InputStreamReader(inputStream));
+            configuration.getKeys(true).stream()
+                    .filter(string -> !configuration.isConfigurationSection(string))
+                    .filter(string -> getConfig().getString(string) == null)
+                    .forEach(string -> getConfig().set(string, configuration.get(string)));
+        }
+        catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static boolean isBungee() {
