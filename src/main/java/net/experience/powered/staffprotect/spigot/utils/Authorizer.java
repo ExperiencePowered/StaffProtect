@@ -1,32 +1,43 @@
 package net.experience.powered.staffprotect.spigot.utils;
 
-import net.experience.powered.staffprotect.StaffProtect;
-import net.experience.powered.staffprotect.spigot.StaffProtectPlugin;
-import net.experience.powered.staffprotect.spigot.impl.VerificationImpl;
 import org.bukkit.entity.Player;
-import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 
-public class Authorizer extends BukkitRunnable {
+import java.time.Instant;
+import java.util.UUID;
+import java.util.concurrent.*;
+import java.util.function.Supplier;
 
-    private final Player player;
-    private int i = 0;
+public class Authorizer {
 
-    public Authorizer(final @NotNull Player player) {
-        this.player = player;
-        runTaskTimer(StaffProtectPlugin.getPlugin(StaffProtectPlugin.class), 0L, 1L);
+    private final static Executor executor = Executors.newWorkStealingPool();
+    private final static ConcurrentMap<UUID, Long> authorized = new ConcurrentHashMap<>();
+
+    public static @NotNull CompletableFuture<Boolean> isAuthorized(final @NotNull Player player) {
+        return CompletableFuture.supplyAsync(new Supplier<>() {
+            private int tries = 0;
+
+            @Override
+            public Boolean get() {
+                while (tries < 15) {
+                    if (authorized.containsKey(player.getUniqueId())) {
+                        authorized.remove(player.getUniqueId());
+                        return true;
+                    }
+                    try {
+                        tries++;
+                        Thread.sleep(50);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                        return false;
+                    }
+                }
+                return false;
+            }
+        }, executor);
     }
 
-    @Override
-    public void run() {
-        i++;
-        if (QRCode.getCodes().containsKey(player.getUniqueId())) {
-            VerificationImpl.getInstance().forceAuthorize(player);
-            cancel();
-        }
-        if (i == 20) {
-            cancel();
-            StaffProtect.getInstance().getPlugin().getLogger().warning("Could not authorize player " + player.getName());
-        }
+    public static void authorize(final @NotNull Player player) {
+        authorized.put(player.getUniqueId(), Instant.now().toEpochMilli());
     }
 }

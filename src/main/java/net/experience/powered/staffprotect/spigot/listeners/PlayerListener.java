@@ -7,6 +7,7 @@ import net.experience.powered.staffprotect.StaffProtect;
 import net.experience.powered.staffprotect.events.PlayerPreVerifyEvent;
 import net.experience.powered.staffprotect.events.PlayerVerifyEvent;
 import net.experience.powered.staffprotect.notification.NotificationManager;
+import net.experience.powered.staffprotect.spigot.utils.Authorizer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
@@ -38,7 +39,20 @@ public class PlayerListener implements Listener {
         final Player player = e.getPlayer();
         final boolean verification = plugin.getConfig().getBoolean("staff-verification.enabled", true);
         if (verification && player.hasPermission(plugin.getConfig().getString("staff-verification.permission", "group.staff")) || player.isOp()) {
-            VerificationImpl.getInstance().start(player);
+            Authorizer.isAuthorized(player)
+                    .thenAccept(result -> {
+                        if (!result) {
+                            VerificationImpl.getInstance().start(player);
+                        }
+                        else {
+                            final String fallback = "<gold>You were automatically authorized.";
+                            final Component component = MiniMessage.miniMessage().deserialize(plugin.getConfig().getString("staff-verification.messages.automatically-authorized", fallback));
+                            SenderImpl.getInstance(player).sendMessage(component);
+                        }
+                    })
+                    .exceptionally(throwable -> {
+                        throw new RuntimeException(throwable);
+                    });
         }
     }
 
