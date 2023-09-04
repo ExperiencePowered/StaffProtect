@@ -1,4 +1,4 @@
-package net.experience.powered.staffprotect.impl;
+package net.experience.powered.staffprotect.spigot.impl;
 
 import net.experience.powered.staffprotect.StaffProtect;
 import net.experience.powered.staffprotect.util.CommandRegisterer;

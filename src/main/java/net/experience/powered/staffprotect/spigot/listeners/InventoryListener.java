@@ -1,7 +1,7 @@
-package net.experience.powered.staffprotect.listeners;
+package net.experience.powered.staffprotect.spigot.listeners;
 
+import net.experience.powered.staffprotect.spigot.StaffProtectPlugin;
 import net.experience.powered.staffprotect.StaffProtect;
-import net.experience.powered.staffprotect.StaffProtectPlugin;
 import net.experience.powered.staffprotect.notification.NotificationManager;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;

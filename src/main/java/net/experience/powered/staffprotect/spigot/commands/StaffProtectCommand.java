@@ -1,10 +1,10 @@
-package net.experience.powered.staffprotect.commands;
+package net.experience.powered.staffprotect.spigot.commands;
 
 import net.experience.powered.staffprotect.StaffProtect;
 import net.experience.powered.staffprotect.addons.AbstractAddon;
 import net.experience.powered.staffprotect.addons.GlobalConfiguration;
-import net.experience.powered.staffprotect.impl.AddonManagerImpl;
-import net.experience.powered.staffprotect.impl.SenderImpl;
+import net.experience.powered.staffprotect.spigot.impl.AddonManagerImpl;
+import net.experience.powered.staffprotect.spigot.impl.SenderImpl;
 import net.experience.powered.staffprotect.notification.NotificationBus;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -116,7 +116,7 @@ public class StaffProtectCommand extends Command {
                         SenderImpl.getInstance(player).sendMessage(component);
                     }
                     else {
-                        SenderImpl.getInstance(player).sendMessage(MiniMessage.miniMessage().deserialize(string, Placeholder.unparsed("addon", pluginName)));
+                        SenderImpl.getInstance(player).sendMessage(MiniMessage.miniMessage().deserialize(string, Placeholder.parsed("addon", pluginName)));
                     }
                 }
                 return result;
@@ -130,7 +130,7 @@ public class StaffProtectCommand extends Command {
                         SenderImpl.getInstance(player).sendMessage(component);
                     }
                     else {
-                        SenderImpl.getInstance(player).sendMessage(MiniMessage.miniMessage().deserialize(string, Placeholder.unparsed("addon", pluginName)));
+                        SenderImpl.getInstance(player).sendMessage(MiniMessage.miniMessage().deserialize(string, Placeholder.parsed("addon", pluginName)));
                     }
                 }
                 return result;
@@ -144,7 +144,7 @@ public class StaffProtectCommand extends Command {
                         SenderImpl.getInstance(player).sendMessage(component);
                     }
                     else {
-                        SenderImpl.getInstance(player).sendMessage(MiniMessage.miniMessage().deserialize(string, Placeholder.unparsed("addon", pluginName)));
+                        SenderImpl.getInstance(player).sendMessage(MiniMessage.miniMessage().deserialize(string, Placeholder.parsed("addon", pluginName)));
                     }
                 }
                 return result;
