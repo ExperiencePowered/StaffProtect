@@ -47,7 +47,6 @@ public final class SQLite extends AbstractDatabase {
             }
             this.connection = null;
         }
-
     }
 
     public boolean isConnected() {
