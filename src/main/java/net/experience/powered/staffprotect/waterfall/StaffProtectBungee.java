@@ -1,17 +1,11 @@
 package net.experience.powered.staffprotect.waterfall;
 
-import net.experience.powered.staffprotect.waterfall.configuration.ProxyConfiguration;
 import net.experience.powered.staffprotect.waterfall.listeners.PlayerListener;
 import net.experience.powered.staffprotect.waterfall.messages.PluginMessageManager;
-import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.plugin.Plugin;
-import org.jetbrains.annotations.NotNull;
 
-import java.io.*;
 import java.util.HashMap;
-import java.util.Objects;
 import java.util.UUID;
-import java.util.logging.Level;
 
 public class StaffProtectBungee extends Plugin {
 
