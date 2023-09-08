@@ -27,8 +27,7 @@ public final class SQLite extends AbstractDatabase {
         config.setJdbcUrl("jdbc:sqlite:" + this.file);
         dataSource = new HikariDataSource(config);
 
-        try {
-            PreparedStatement statement = getConnection().prepareStatement("CREATE TABLE IF NOT EXISTS verification (playerName varchar(255), secretKey varchar(31))");
+        try (PreparedStatement statement = getConnection().prepareStatement("CREATE TABLE IF NOT EXISTS verification (playerName varchar(255), secretKey varchar(31))")) {
             statement.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException(e);
