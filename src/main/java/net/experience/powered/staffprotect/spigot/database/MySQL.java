@@ -4,52 +4,43 @@ import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import org.jetbrains.annotations.NotNull;
 
-import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 public final class MySQL extends AbstractDatabase {
-    private HikariDataSource hikari;
-
-    public MySQL(@NotNull HikariConfig hikariConfig) {
-        super(hikariConfig);
+    public MySQL(final @NotNull DatabaseProperties properties) {
+        super(properties);
     }
 
     @Override
     public void connect() {
-        hikari = new HikariDataSource(hikariConfig);
+        properties.initializeNullRunnable((string) -> {
+            throw new IllegalStateException("Property " + string + " is null.");
+        });
 
         try {
-            assert getConnection() != null;
-            PreparedStatement statement = getConnection().prepareStatement("CREATE TABLE IF NOT EXISTS verification (playerName varchar(255), secretKey varchar(31))");
-            statement.executeUpdate();
+            DriverManager.registerDriver(new com.mysql.cj.jdbc.Driver());
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-    }
 
-    @Override
-    public void disconnect() {
-        if (this.isConnected()) {
-            try {
-                assert getConnection() != null;
-                getConnection().close();
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
-            }
-            this.hikari = null;
-        }
-    }
+        String builder = "jdbc:mysql://" + properties.getProperty("host") +
+                ":" +
+                properties.getProperty("port") +
+                "/" +
+                properties.getProperty("database") +
+                "?useSSL=" +
+                properties.getProperty("useSSL");
 
-    @Override
-    public boolean isConnected() {
-        return hikari != null;
-    }
-
-    @Override
-    public Connection getConnection() {
-        try {
-            return hikari.getConnection();
+        final HikariConfig config = new HikariConfig();
+        config.setJdbcUrl(builder);
+        config.setPassword((String) properties.getProperty("password"));
+        config.setUsername((String) properties.getProperty("username"));
+        dataSource = new HikariDataSource(config);
+        try (PreparedStatement statement = getConnection().prepareStatement("CREATE TABLE IF NOT EXISTS verification (playerName varchar(255), secretKey varchar(31))")){
+            assert getConnection() != null;
+            statement.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
