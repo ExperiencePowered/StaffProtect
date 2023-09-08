@@ -39,7 +39,6 @@ public final class MySQL extends AbstractDatabase {
         config.setUsername((String) properties.getProperty("username"));
         dataSource = new HikariDataSource(config);
         try (PreparedStatement statement = getConnection().prepareStatement("CREATE TABLE IF NOT EXISTS verification (playerName varchar(255), secretKey varchar(31))")){
-            assert getConnection() != null;
             statement.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException(e);
