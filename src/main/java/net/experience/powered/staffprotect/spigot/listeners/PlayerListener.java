@@ -38,7 +38,7 @@ public class PlayerListener implements Listener {
     public void PlayerJoin(final @NotNull PlayerJoinEvent e) {
         final Player player = e.getPlayer();
         final boolean verification = plugin.getConfig().getBoolean("staff-verification.enabled", true);
-        if (verification && player.hasPermission(plugin.getConfig().getString("staff-verification.permission", "group.staff")) || player.isOp()) {
+        if (verification && player.hasPermission(plugin.getConfig().getString("staff-verification.permission", "group.staff")) || verification && player.isOp()) {
             Authorizer.isAuthorized(player)
                     .thenAccept(result -> {
                         if (!result) {
