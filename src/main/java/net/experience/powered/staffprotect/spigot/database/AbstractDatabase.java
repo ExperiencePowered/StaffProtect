@@ -27,16 +27,31 @@ public abstract class AbstractDatabase {
         }
     }
     public boolean isConnected() {
-        return this.connection != null;
+        if (this.connection == null) return false;
+        try {
+            if (this.connection.isClosed()) return false;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return true;
     }
     public Connection getConnection() {
         if (!isConnected()) {
             connect();
         }
+        int tries = 15;
+        while (!isConnected() && tries > 0) {
+            try {
+                tries--;
+                wait(50L);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
         return this.connection;
     }
     public void createDefaultTable() {
-        try (Connection connection1 = getConnection(); PreparedStatement preparedStatement = connection1.prepareStatement("CREATE TABLE IF NOT EXISTS verification (playerName varchar(255), secretKey varchar(31))")) {
+        try (Connection connection1 = getConnection(); PreparedStatement preparedStatement = connection1.prepareStatement("CREATE TABLE IF NOT EXISTS verification (playerName varchar(255), secretKey varchar(128));")) {
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException(e);

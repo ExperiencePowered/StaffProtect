@@ -5,7 +5,6 @@ import org.bukkit.Bukkit;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.DriverManager;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.SQLSyntaxErrorException;
 
@@ -31,7 +30,7 @@ public final class MySQL extends AbstractDatabase {
                 properties.getProperty("port") +
                 "/" +
                 properties.getProperty("database") +
-                "?useSSL=" +
+                "?allowPublicKeyRetrieval=true&useSSL=" +
                 properties.getProperty("useSSL");
         try {
             connection = DriverManager.getConnection(builder, (String) properties.getProperty("username"), (String) properties.getProperty("password"));
