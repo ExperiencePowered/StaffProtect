@@ -41,7 +41,7 @@ public class VerificationImpl extends Verification {
     public void start(final @NotNull Player player) {
         CompletableFuture.supplyAsync(() -> {
             QRPlayerImpl qrPlayer;
-            try (Connection connection = database.getConnection(); PreparedStatement preparedStatement = connection.prepareStatement("SELECT secretKey FROM verification WHERE playerName = (?);")){
+            try (Connection connection = database.getConnection(); PreparedStatement preparedStatement = connection.prepareStatement("SELECT secretKey FROM verification WHERE playerName = (?) LIMIT 1;")){
                 preparedStatement.setString(1, player.getName());
                 ResultSet resultSet = preparedStatement.executeQuery();
                 if (resultSet.next()) {
