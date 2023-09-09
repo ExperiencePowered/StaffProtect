@@ -1,21 +1,17 @@
 package net.experience.powered.staffprotect.waterfall;
 
-import net.experience.powered.staffprotect.waterfall.configuration.ProxyConfiguration;
 import net.experience.powered.staffprotect.waterfall.listeners.PlayerListener;
 import net.experience.powered.staffprotect.waterfall.messages.PluginMessageManager;
-import net.md_5.bungee.api.ProxyServer;
+import net.experience.powered.staffprotect.waterfall.utils.Metrics;
 import net.md_5.bungee.api.plugin.Plugin;
-import org.jetbrains.annotations.NotNull;
 
-import java.io.*;
 import java.util.HashMap;
-import java.util.Objects;
 import java.util.UUID;
-import java.util.logging.Level;
 
 public class StaffProtectBungee extends Plugin {
 
     private static StaffProtectBungee instance;
+
 
     private HashMap<UUID, Boolean> authorized;
     private PluginMessageManager messageManager;
@@ -30,6 +26,8 @@ public class StaffProtectBungee extends Plugin {
 
         getProxy().getPluginManager().registerListener(this, messageManager);
         getProxy().getPluginManager().registerListener(this, new PlayerListener());
+
+        new Metrics(this, 19766);
     }
 
     @Override

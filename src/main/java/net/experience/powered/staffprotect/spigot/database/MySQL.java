@@ -1,55 +1,42 @@
 package net.experience.powered.staffprotect.spigot.database;
 
-import com.zaxxer.hikari.HikariConfig;
-import com.zaxxer.hikari.HikariDataSource;
+import net.experience.powered.staffprotect.spigot.StaffProtectPlugin;
+import org.bukkit.Bukkit;
 import org.jetbrains.annotations.NotNull;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
+import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.sql.SQLSyntaxErrorException;
 
 public final class MySQL extends AbstractDatabase {
-    private HikariDataSource hikari;
-
-    public MySQL(@NotNull HikariConfig hikariConfig) {
-        super(hikariConfig);
+    public MySQL(final @NotNull DatabaseProperties properties) {
+        super(properties);
     }
 
     @Override
     public void connect() {
-        hikari = new HikariDataSource(hikariConfig);
+        properties.initializeNullRunnable((string) -> {
+            throw new IllegalStateException("Property " + string + " is null.");
+        });
 
         try {
-            assert getConnection() != null;
-            PreparedStatement statement = getConnection().prepareStatement("CREATE TABLE IF NOT EXISTS verification (playerName varchar(255), secretKey varchar(31))");
-            statement.executeUpdate();
+            DriverManager.registerDriver(new com.mysql.cj.jdbc.Driver());
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-    }
 
-    @Override
-    public void disconnect() {
-        if (this.isConnected()) {
-            try {
-                assert getConnection() != null;
-                getConnection().close();
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
-            }
-            this.hikari = null;
-        }
-    }
-
-    @Override
-    public boolean isConnected() {
-        return hikari != null;
-    }
-
-    @Override
-    public Connection getConnection() {
+        String builder = "jdbc:mysql://" + properties.getProperty("host") +
+                ":" +
+                properties.getProperty("port") +
+                "/" +
+                properties.getProperty("database") +
+                "?allowPublicKeyRetrieval=true&useSSL=" +
+                properties.getProperty("useSSL");
         try {
-            return hikari.getConnection();
+            connection = DriverManager.getConnection(builder, (String) properties.getProperty("username"), (String) properties.getProperty("password"));
+        } catch (SQLSyntaxErrorException e) {
+            Bukkit.getPluginManager().disablePlugin(StaffProtectPlugin.getPlugin(StaffProtectPlugin.class));
+            throw new RuntimeException("Could not start MySQL, try choosing another MySQL host.");
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

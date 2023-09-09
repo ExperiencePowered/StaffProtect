@@ -7,6 +7,7 @@ import net.experience.powered.staffprotect.StaffProtect;
 import net.experience.powered.staffprotect.events.PlayerPreVerifyEvent;
 import net.experience.powered.staffprotect.events.PlayerVerifyEvent;
 import net.experience.powered.staffprotect.notification.NotificationManager;
+import net.experience.powered.staffprotect.spigot.messages.PluginMessageManager;
 import net.experience.powered.staffprotect.spigot.utils.Authorizer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -21,6 +22,8 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.player.*;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Optional;
 
 import static net.kyori.adventure.text.format.NamedTextColor.*;
 
@@ -38,7 +41,7 @@ public class PlayerListener implements Listener {
     public void PlayerJoin(final @NotNull PlayerJoinEvent e) {
         final Player player = e.getPlayer();
         final boolean verification = plugin.getConfig().getBoolean("staff-verification.enabled", true);
-        if (verification && player.hasPermission(plugin.getConfig().getString("staff-verification.permission", "group.staff")) || player.isOp()) {
+        if (verification && player.hasPermission(plugin.getConfig().getString("staff-verification.permission", "group.staff")) || verification && player.isOp()) {
             Authorizer.isAuthorized(player)
                     .thenAccept(result -> {
                         if (!result) {
@@ -49,10 +52,21 @@ public class PlayerListener implements Listener {
                             final Component component = MiniMessage.miniMessage().deserialize(plugin.getConfig().getString("staff-verification.messages.automatically-authorized", fallback));
                             SenderImpl.getInstance(player).sendMessage(component);
                         }
-                    })
-                    .exceptionally(throwable -> {
-                        throw new RuntimeException(throwable);
+                    }).exceptionally(throwable -> {
+                        Bukkit.getScheduler().runTask(plugin, () -> player.kickPlayer("We were unable to verify you!"));
+                        throwable.printStackTrace();
+                        return null;
                     });
+        }
+        else if (!verification && StaffProtectPlugin.isBungee()) {
+            Optional<PluginMessageManager> optional = plugin.getMessageManager();
+            optional.ifPresent(pluginMessageManager -> pluginMessageManager.sendAuthorization(player));
+            Authorizer.authorize(player);
+        }
+        else if (verification && !player.hasPermission(plugin.getConfig().getString("staff-verification.permission", "group.staff")) || verification && !player.isOp()) {
+            Optional<PluginMessageManager> optional = plugin.getMessageManager();
+            optional.ifPresent(pluginMessageManager -> pluginMessageManager.sendAuthorization(player));
+            Authorizer.authorize(player);
         }
     }
 
@@ -60,6 +74,10 @@ public class PlayerListener implements Listener {
     public void onAsyncChat(final @NotNull AsyncPlayerChatEvent e) {
         final String message = e.getMessage();
         final Player player = e.getPlayer();
+        if (!VerificationImpl.getInstance().isAuthorized(player)) {
+            e.setMessage("");
+            e.setCancelled(true);
+        }
         Bukkit.getScheduler().runTask(plugin, () -> {
             final PlayerPreVerifyEvent preVerifyEvent = new PlayerPreVerifyEvent(player, message);
             Bukkit.getPluginManager().callEvent(preVerifyEvent);
@@ -67,8 +85,6 @@ public class PlayerListener implements Listener {
                 return;
             }
             if (!VerificationImpl.getInstance().isAuthorized(player)) {
-                e.setCancelled(true);
-
                 int code;
                 PlayerVerifyEvent verifyEvent;
                 try {
@@ -81,7 +97,6 @@ public class PlayerListener implements Listener {
                     return;
                 }
 
-                e.setCancelled(true);
                 if (VerificationImpl.getInstance().authorize(player, code)) {
                     verifyEvent = new PlayerVerifyEvent(player, code, true);
                     final String fallback = "<gold>Welcome on <server>.";

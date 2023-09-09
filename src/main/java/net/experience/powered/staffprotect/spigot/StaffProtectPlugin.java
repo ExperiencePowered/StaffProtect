@@ -1,6 +1,5 @@
 package net.experience.powered.staffprotect.spigot;
 
-import com.zaxxer.hikari.HikariConfig;
 import net.experience.powered.staffprotect.StaffProtect;
 import net.experience.powered.staffprotect.StaffProtectProvider;
 import net.experience.powered.staffprotect.notification.NotificationBus;
@@ -10,6 +9,7 @@ import net.experience.powered.staffprotect.records.Record;
 import net.experience.powered.staffprotect.records.RecordFile;
 import net.experience.powered.staffprotect.spigot.commands.StaffProtectCommand;
 import net.experience.powered.staffprotect.spigot.database.AbstractDatabase;
+import net.experience.powered.staffprotect.spigot.database.DatabaseProperties;
 import net.experience.powered.staffprotect.spigot.database.MySQL;
 import net.experience.powered.staffprotect.spigot.database.SQLite;
 import net.experience.powered.staffprotect.spigot.impl.AddonManagerImpl;
@@ -30,6 +30,7 @@ import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.messaging.Messenger;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnmodifiableView;
@@ -74,7 +75,7 @@ public final class StaffProtectPlugin extends JavaPlugin {
         Bukkit.getServicesManager().register(StaffProtect.class, api, this, ServicePriority.Normal);
         ((AddonManagerImpl) api.getAddonManager()).enableAddons();
 
-        final HikariConfig config = new HikariConfig();
+        final DatabaseProperties databaseProperties = new DatabaseProperties("public");
         final String databaseType = getConfig().getString("database.type", "SQLite");
         if (databaseType.equalsIgnoreCase("SQLite")) {
             final File databaseFile = new File(getDataFolder(), "Database.db");
@@ -85,24 +86,28 @@ public final class StaffProtectPlugin extends JavaPlugin {
                     throw new RuntimeException(e);
                 }
             }
-            this.database = new SQLite(config, databaseFile);
+            this.database = new SQLite(databaseProperties, databaseFile);
         }
         else if (databaseType.equalsIgnoreCase("MySQL")) {
             final String host = getConfig().getString("database.mysql.host", "127.0.0.1");
             final int port = getConfig().getInt("database.mysql.port", 3306);
             final String database = getConfig().getString("database.mysql.database", "db");
-            final String password = getConfig().getString("database.mysql.username", "root");
-            final String username = getConfig().getString("database.mysql.password", "");
-            final boolean useSSL = getConfig().getBoolean("database.mysql.useSSL", false);
-            config.setJdbcUrl("jdbc:mysql://" + host + ":" + port + "/" + database + "?useeSSL=" + useSSL);
-            config.setPassword(password);
-            config.setUsername(username);
-            this.database = new MySQL(config);
+            final String username = getConfig().getString("database.mysql.username", "root");
+            final String password = getConfig().getString("database.mysql.password", "");
+            final boolean useSSL = getConfig().getBoolean("database.mysql.useSSL", true);
+            databaseProperties.write("host", host);
+            databaseProperties.write("port", port);
+            databaseProperties.write("database", database);
+            databaseProperties.write("password", password);
+            databaseProperties.write("username", username);
+            databaseProperties.write("useSSL", useSSL);
+            this.database = new MySQL(databaseProperties);
         }
         else {
             throw new IllegalStateException("This database type : " + databaseType + " does not exist.");
         }
         database.connect();
+        database.createDefaultTable();
 
         final PluginManager pluginManager = Bukkit.getPluginManager();
         pluginManager.registerEvents(new InventoryListener(api), this);
@@ -162,10 +167,15 @@ public final class StaffProtectPlugin extends JavaPlugin {
             recordFile.writeRecord(new Record(System.currentTimeMillis(), "Server", "StaffProtect was disabled."));
             recordFile.writeRecord(new Record(System.currentTimeMillis(), "StaffProtect", "Saved file."));
         }
-
-        metrics.shutdown();
-        if (api == null) return;
-        ((AddonManagerImpl) api.getAddonManager()).disableAddons();
+        if (database != null) {
+            database.disconnect();
+        }
+        if (metrics != null) {
+            metrics.shutdown();
+        }
+        if (api != null) {
+            ((AddonManagerImpl) api.getAddonManager()).disableAddons();
+        }
     }
 
     @NotNull
@@ -255,8 +265,9 @@ public final class StaffProtectPlugin extends JavaPlugin {
         return bungee;
     }
 
-    public PluginMessageManager getMessageManager() {
-        return messageManager;
+    @Contract(value = " -> new", pure = true)
+    public @NotNull Optional<PluginMessageManager> getMessageManager() {
+        return Optional.of(messageManager);
     }
 
     public AbstractDatabase getDatabase() {

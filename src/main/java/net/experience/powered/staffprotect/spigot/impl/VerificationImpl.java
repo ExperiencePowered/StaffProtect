@@ -2,22 +2,28 @@ package net.experience.powered.staffprotect.spigot.impl;
 
 import com.warrenstrange.googleauth.GoogleAuthenticator;
 import com.warrenstrange.googleauth.GoogleAuthenticatorKey;
+import net.experience.powered.staffprotect.global.EncodingUtil;
 import net.experience.powered.staffprotect.spigot.StaffProtectPlugin;
 import net.experience.powered.staffprotect.spigot.database.AbstractDatabase;
+import net.experience.powered.staffprotect.spigot.messages.PluginMessageManager;
 import net.experience.powered.staffprotect.spigot.utils.Expiring;
 import net.experience.powered.staffprotect.spigot.utils.QRCode;
 import net.experience.powered.staffprotect.verifications.Verification;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.jetbrains.annotations.NotNull;
 
+import java.nio.charset.StandardCharsets;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 public class VerificationImpl extends Verification {
@@ -40,27 +46,31 @@ public class VerificationImpl extends Verification {
     public void start(final @NotNull Player player) {
         CompletableFuture.supplyAsync(() -> {
             QRPlayerImpl qrPlayer;
-            try (PreparedStatement preparedStatement = database.getConnection().prepareStatement("SELECT secretKey FROM verification WHERE playerName = (?);")){
+            Connection connection = database.getConnection();
+            EncodingUtil util = EncodingUtil.getInstance();
+            try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT secretKey FROM verification WHERE playerName = (?) LIMIT 1;")){
                 preparedStatement.setString(1, player.getName());
                 ResultSet resultSet = preparedStatement.executeQuery();
                 if (resultSet.next()) {
-                    qrPlayer = new QRPlayerImpl(resultSet.getString("secretKey"), false);
+                    String secretKey = resultSet.getString("secretKey");
+                    qrPlayer = new QRPlayerImpl(util.decode(secretKey.getBytes(StandardCharsets.UTF_8)), false);
                 }
                 else {
                     final GoogleAuthenticator gAuth = new GoogleAuthenticator();
                     final GoogleAuthenticatorKey key = gAuth.createCredentials();
                     qrPlayer = new QRPlayerImpl(key.getKey(), true);
-
-                    try (PreparedStatement preparedStatement1 = database.getConnection().prepareStatement("INSERT INTO verification (playerName, secretKey) VALUES (?, ?);")){
-                        preparedStatement1.setString(1, player.getName());
-                        preparedStatement1.setString(2, qrPlayer.getSecretKey());
-                        preparedStatement1.executeUpdate();
-                    } catch (SQLException e) {
-                        throw new RuntimeException(e);
-                    }
                 }
             } catch (SQLException e) {
                 throw new RuntimeException(e);
+            }
+            if (qrPlayer.isFirstVerify()) {
+                try (PreparedStatement preparedStatement1 = connection.prepareStatement("INSERT INTO verification (playerName, secretKey) VALUES (?, ?);")){
+                    preparedStatement1.setString(1, player.getName());
+                    preparedStatement1.setString(2, new String(util.encode(qrPlayer.getSecretKey()), StandardCharsets.UTF_8));
+                    preparedStatement1.executeUpdate();
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
             }
             return qrPlayer;
         }).thenAccept((qrPlayer) -> {
@@ -86,7 +96,9 @@ public class VerificationImpl extends Verification {
             new Expiring(player, this);
             QRCode.getCodes().put(player.getUniqueId(), qrPlayer);
         }).exceptionally(throwable -> {
-            throw new RuntimeException(throwable);
+            Bukkit.getScheduler().runTask(plugin, () -> player.kickPlayer("We were unable to verify you!"));
+            throwable.printStackTrace();
+            return null;
         });
     }
 
@@ -115,7 +127,8 @@ public class VerificationImpl extends Verification {
         }
         if (result) {
             end(player);
-            plugin.getMessageManager().sendAuthorization(player);
+            Optional<PluginMessageManager> optional = plugin.getMessageManager();
+            optional.ifPresent(pluginMessageManager -> pluginMessageManager.sendAuthorization(player));
         }
         return result;
     }
