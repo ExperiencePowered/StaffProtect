@@ -106,6 +106,7 @@ public final class StaffProtectPlugin extends JavaPlugin {
             throw new IllegalStateException("This database type : " + databaseType + " does not exist.");
         }
         database.connect();
+        database.createDefaultTable();
 
         final PluginManager pluginManager = Bukkit.getPluginManager();
         pluginManager.registerEvents(new InventoryListener(api), this);
