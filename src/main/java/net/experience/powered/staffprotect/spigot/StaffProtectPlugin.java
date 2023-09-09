@@ -30,6 +30,7 @@ import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.messaging.Messenger;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnmodifiableView;
@@ -264,8 +265,9 @@ public final class StaffProtectPlugin extends JavaPlugin {
         return bungee;
     }
 
-    public PluginMessageManager getMessageManager() {
-        return messageManager;
+    @Contract(value = " -> new", pure = true)
+    public @NotNull Optional<PluginMessageManager> getMessageManager() {
+        return Optional.of(messageManager);
     }
 
     public AbstractDatabase getDatabase() {
