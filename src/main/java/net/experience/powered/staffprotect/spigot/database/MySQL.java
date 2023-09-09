@@ -1,7 +1,5 @@
 package net.experience.powered.staffprotect.spigot.database;
 
-import com.zaxxer.hikari.HikariConfig;
-import com.zaxxer.hikari.HikariDataSource;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.DriverManager;
@@ -32,16 +30,16 @@ public final class MySQL extends AbstractDatabase {
                 properties.getProperty("database") +
                 "?useSSL=" +
                 properties.getProperty("useSSL");
-
-        final HikariConfig config = new HikariConfig();
-        config.setJdbcUrl(builder);
-        config.setPassword((String) properties.getProperty("password"));
-        config.setUsername((String) properties.getProperty("username"));
-        dataSource = new HikariDataSource(config);
+        try {
+            connection = DriverManager.getConnection(builder, (String) properties.getProperty("username"), (String) properties.getProperty("password"));
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
         try (PreparedStatement statement = getConnection().prepareStatement("CREATE TABLE IF NOT EXISTS verification (playerName varchar(255), secretKey varchar(31))")){
             statement.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+        disconnect();
     }
 }

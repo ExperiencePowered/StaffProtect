@@ -1,10 +1,9 @@
 package net.experience.powered.staffprotect.spigot.database;
 
-import com.zaxxer.hikari.HikariConfig;
-import com.zaxxer.hikari.HikariDataSource;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
+import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
@@ -22,15 +21,16 @@ public final class SQLite extends AbstractDatabase {
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
-
-        final HikariConfig config = new HikariConfig();
-        config.setJdbcUrl("jdbc:sqlite:" + this.file);
-        dataSource = new HikariDataSource(config);
-
+        try {
+            connection = DriverManager.getConnection("jdbc:sqlite:" + this.file);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
         try (PreparedStatement statement = getConnection().prepareStatement("CREATE TABLE IF NOT EXISTS verification (playerName varchar(255), secretKey varchar(31))")) {
             statement.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+        disconnect();
     }
 }

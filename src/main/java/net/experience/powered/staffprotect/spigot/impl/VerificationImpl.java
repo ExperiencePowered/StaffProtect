@@ -15,6 +15,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.jetbrains.annotations.NotNull;
 
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -40,7 +41,7 @@ public class VerificationImpl extends Verification {
     public void start(final @NotNull Player player) {
         CompletableFuture.supplyAsync(() -> {
             QRPlayerImpl qrPlayer;
-            try (PreparedStatement preparedStatement = database.getConnection().prepareStatement("SELECT secretKey FROM verification WHERE playerName = (?);")){
+            try (Connection connection = database.getConnection(); PreparedStatement preparedStatement = connection.prepareStatement("SELECT secretKey FROM verification WHERE playerName = (?);")){
                 preparedStatement.setString(1, player.getName());
                 ResultSet resultSet = preparedStatement.executeQuery();
                 if (resultSet.next()) {
@@ -51,7 +52,7 @@ public class VerificationImpl extends Verification {
                     final GoogleAuthenticatorKey key = gAuth.createCredentials();
                     qrPlayer = new QRPlayerImpl(key.getKey(), true);
 
-                    try (PreparedStatement preparedStatement1 = database.getConnection().prepareStatement("INSERT INTO verification (playerName, secretKey) VALUES (?, ?);")){
+                    try (PreparedStatement preparedStatement1 = connection.prepareStatement("INSERT INTO verification (playerName, secretKey) VALUES (?, ?);")){
                         preparedStatement1.setString(1, player.getName());
                         preparedStatement1.setString(2, qrPlayer.getSecretKey());
                         preparedStatement1.executeUpdate();

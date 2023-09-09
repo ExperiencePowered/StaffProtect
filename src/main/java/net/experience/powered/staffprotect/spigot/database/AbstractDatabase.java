@@ -1,6 +1,5 @@
 package net.experience.powered.staffprotect.spigot.database;
 
-import com.zaxxer.hikari.HikariDataSource;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.Connection;
@@ -8,7 +7,7 @@ import java.sql.SQLException;
 
 public abstract class AbstractDatabase {
 
-    protected HikariDataSource dataSource;
+    protected Connection connection;
     protected final DatabaseProperties properties;
 
     public AbstractDatabase(final @NotNull DatabaseProperties properties) {
@@ -18,21 +17,21 @@ public abstract class AbstractDatabase {
     public abstract void connect();
     public void disconnect() {
         if (this.isConnected()) {
-            this.dataSource.close();
-            this.dataSource = null;
+            try {
+                this.connection.close();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+            this.connection = null;
         }
     }
     public boolean isConnected() {
-        return this.dataSource != null;
+        return this.connection != null;
     }
     public Connection getConnection() {
         if (!isConnected()) {
             connect();
         }
-        try {
-            return this.dataSource.getConnection();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        return this.connection;
     }
 }
