@@ -6,7 +6,7 @@ authors:
   - "JakushCZ"
   - "Hitman"
 libraries:
-  - "org.jetbrains.kotlin:kotlin-stdlib-jdk8:{$kotlin_version}"
+  - "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${kotlin_version}"
   - "com.google.zxing:javase:3.5.1"
   - "net.kyori:adventure-api:4.3.0"
   - "net.kyori:adventure-platform-bukkit:4.3.0"
