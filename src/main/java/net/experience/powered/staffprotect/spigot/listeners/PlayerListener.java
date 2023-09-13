@@ -1,5 +1,7 @@
 package net.experience.powered.staffprotect.spigot.listeners;
 
+import net.experience.powered.staffprotect.records.Record;
+import net.experience.powered.staffprotect.records.RecordFile;
 import net.experience.powered.staffprotect.spigot.StaffProtectPlugin;
 import net.experience.powered.staffprotect.spigot.impl.SenderImpl;
 import net.experience.powered.staffprotect.spigot.impl.VerificationImpl;
@@ -23,6 +25,7 @@ import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.player.*;
 import org.jetbrains.annotations.NotNull;
 
+import java.net.InetSocketAddress;
 import java.util.Optional;
 
 import static net.kyori.adventure.text.format.NamedTextColor.*;
@@ -41,7 +44,17 @@ public class PlayerListener implements Listener {
     public void PlayerJoin(final @NotNull PlayerJoinEvent e) {
         final Player player = e.getPlayer();
         final boolean verification = plugin.getConfig().getBoolean("staff-verification.enabled", true);
-        if (verification && player.hasPermission(plugin.getConfig().getString("staff-verification.permission", "group.staff")) || verification && player.isOp()) {
+        final boolean staff = player.hasPermission(plugin.getConfig().getString("staff-verification.permission", "group.staff"));
+        if (staff) {
+            final InetSocketAddress address = player.getAddress();
+            if (address != null) {
+                RecordFile.getInstance().writeRecord(new Record(System.currentTimeMillis(), player.getName(), "Staff has joined with address (" + address.getHostName() + ":" + address.getPort() + ")."));
+            }
+            else {
+                RecordFile.getInstance().writeRecord(new Record(System.currentTimeMillis(), player.getName(), player.getName() + " has joined."));
+            }
+        }
+        if (verification && staff || verification && player.isOp()) {
             Authorizer.isAuthorized(player)
                     .thenAccept(result -> {
                         if (!result) {
@@ -63,7 +76,7 @@ public class PlayerListener implements Listener {
             optional.ifPresent(pluginMessageManager -> pluginMessageManager.sendAuthorization(player));
             Authorizer.authorize(player);
         }
-        else if (verification && !player.hasPermission(plugin.getConfig().getString("staff-verification.permission", "group.staff")) || verification && !player.isOp()) {
+        else if (verification && !staff || verification && !player.isOp()) {
             Optional<PluginMessageManager> optional = plugin.getMessageManager();
             optional.ifPresent(pluginMessageManager -> pluginMessageManager.sendAuthorization(player));
             Authorizer.authorize(player);
@@ -133,6 +146,16 @@ public class PlayerListener implements Listener {
     public void PlayerQuit(final @NotNull PlayerQuitEvent e) {
         final Player player = e.getPlayer();
         api.getNotificationBus().unsubscribe(player.getUniqueId());
+        final boolean staff = player.hasPermission(plugin.getConfig().getString("staff-verification.permission", "group.staff"));
+        if (staff) {
+            final InetSocketAddress address = player.getAddress();
+            if (address != null) {
+                RecordFile.getInstance().writeRecord(new Record(System.currentTimeMillis(), player.getName(), "Staff has left with address (" + address.getHostName() + ":" + address.getPort() + ")."));
+            }
+            else {
+                RecordFile.getInstance().writeRecord(new Record(System.currentTimeMillis(), player.getName(), player.getName() + " has left."));
+            }
+        }
         if (!VerificationImpl.getInstance().isAuthorized(player)) {
             VerificationImpl.getInstance().end(player);
         }
