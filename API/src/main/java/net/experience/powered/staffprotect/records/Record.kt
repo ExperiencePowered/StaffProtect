@@ -3,17 +3,13 @@ package net.experience.powered.staffprotect.records
 import java.io.File
 import java.io.FileReader
 import java.io.FileWriter
-import java.text.SimpleDateFormat
 import java.util.*
 
-class Record(private var time: Long, player: String, content: String) {
-
-    private var player: String? = player
-    private var content: String? = content
+class Record(private var time: Long?, private var player: String?, private var content: String?) {
 
     override fun toString(): String {
-        val format = SimpleDateFormat("HH:mm:ss")
-        val time = format.format(Date(time))
+        val format = RecordFile.dateFormat
+        val time = format.format(time?.let { Date(it) })
         return "($time) [$player]: $content"
     }
 
@@ -36,5 +32,9 @@ class Record(private var time: Long, player: String, content: String) {
 
     fun getPlayer(): String {
         return player!!
+    }
+
+    fun isValid(): Boolean {
+        return !(time == null || player == null || content == null)
     }
 }
