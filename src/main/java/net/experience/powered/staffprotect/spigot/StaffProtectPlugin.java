@@ -5,6 +5,7 @@ import net.experience.powered.staffprotect.StaffProtectProvider;
 import net.experience.powered.staffprotect.notification.NotificationBus;
 import net.experience.powered.staffprotect.notification.NotificationManager;
 import net.experience.powered.staffprotect.notification.Subscriber;
+import net.experience.powered.staffprotect.records.CapturedRecordFile;
 import net.experience.powered.staffprotect.records.Record;
 import net.experience.powered.staffprotect.records.RecordFile;
 import net.experience.powered.staffprotect.spigot.commands.StaffProtectCommand;
@@ -47,6 +48,7 @@ import java.util.*;
 
 public final class StaffProtectPlugin extends JavaPlugin {
 
+    private static StaffProtectPlugin instance;
     private static boolean bungee;
     private PluginMessageManager messageManager;
     private AbstractDatabase database;
@@ -56,6 +58,7 @@ public final class StaffProtectPlugin extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        StaffProtectPlugin.instance = this;
         this.versionController = new VersionController(getDataFolder());
 
         String info = " (Git: " +
@@ -272,5 +275,9 @@ public final class StaffProtectPlugin extends JavaPlugin {
 
     public AbstractDatabase getDatabase() {
         return database;
+    }
+
+    public static StaffProtectPlugin getInstance() {
+        return instance;
     }
 }
