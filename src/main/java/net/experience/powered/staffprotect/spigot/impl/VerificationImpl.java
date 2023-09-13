@@ -3,6 +3,8 @@ package net.experience.powered.staffprotect.spigot.impl;
 import com.warrenstrange.googleauth.GoogleAuthenticator;
 import com.warrenstrange.googleauth.GoogleAuthenticatorKey;
 import net.experience.powered.staffprotect.global.EncodingUtil;
+import net.experience.powered.staffprotect.records.Record;
+import net.experience.powered.staffprotect.records.RecordFile;
 import net.experience.powered.staffprotect.spigot.StaffProtectPlugin;
 import net.experience.powered.staffprotect.spigot.database.AbstractDatabase;
 import net.experience.powered.staffprotect.spigot.messages.PluginMessageManager;
@@ -129,6 +131,7 @@ public class VerificationImpl extends Verification {
             end(player);
             Optional<PluginMessageManager> optional = plugin.getMessageManager();
             optional.ifPresent(pluginMessageManager -> pluginMessageManager.sendAuthorization(player));
+            RecordFile.getInstance().writeRecord(new Record(System.currentTimeMillis(), player.getName(), "Staff was authorized."));
         }
         return result;
     }
