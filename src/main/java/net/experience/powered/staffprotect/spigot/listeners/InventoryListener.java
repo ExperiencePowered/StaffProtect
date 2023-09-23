@@ -1,5 +1,6 @@
 package net.experience.powered.staffprotect.spigot.listeners;
 
+import net.experience.powered.staffprotect.records.ActionType;
 import net.experience.powered.staffprotect.spigot.StaffProtectPlugin;
 import net.experience.powered.staffprotect.StaffProtect;
 import net.experience.powered.staffprotect.notification.NotificationManager;
@@ -58,6 +59,6 @@ public class InventoryListener implements Listener {
         final String string = configuration.getString("notification.creative-tracking.message", "String not found.");
         final MiniMessage miniMessage = MiniMessage.miniMessage();
         final Component component = miniMessage.deserialize(string, Placeholder.parsed("player", player.getName()), Placeholder.parsed("item", fItem));
-        NotificationManager.getInstance().sendMessage(player.getName(), component);
+        NotificationManager.getInstance().sendMessage(player.getName(), player.getUniqueId(), component, ActionType.INVENTORY);
     }
 }

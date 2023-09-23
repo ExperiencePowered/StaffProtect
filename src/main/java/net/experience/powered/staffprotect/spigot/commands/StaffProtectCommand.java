@@ -66,6 +66,9 @@ public class StaffProtectCommand extends Command {
         if (sub.equalsIgnoreCase("notification")) {
             return SubcommandManager.getSubcommand(NotificationSub.class).command(sender, args);
         }
+        if (sub.equalsIgnoreCase("record")) {
+            return SubcommandManager.getSubcommand(RecordSub.class).command(sender, args);
+        }
         return execute(sender, commandLabel, new String[]{});
     }
 

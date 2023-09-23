@@ -1,5 +1,7 @@
 package net.experience.powered.staffprotect.spigot.utils;
 
+import net.experience.powered.staffprotect.notification.NotificationManager;
+import net.experience.powered.staffprotect.records.ActionType;
 import net.experience.powered.staffprotect.records.Record;
 import net.experience.powered.staffprotect.records.RecordFile;
 import net.experience.powered.staffprotect.spigot.StaffProtectPlugin;
@@ -39,7 +41,7 @@ public class Expiring extends BukkitRunnable {
             final Component component = MiniMessage.miniMessage().deserialize(plugin.getConfig().getString("staff-verification.messages.time-expired", fallback));
             impl.end(player);
             player.kickPlayer(LegacyComponentSerializer.legacySection().serialize(component));
-            RecordFile.getInstance().writeRecord(new Record(System.currentTimeMillis(), player.getName(), "Staff failed to authorize (Authorizing took too long)."));
+            NotificationManager.getInstance().sendQuietMessage(player.getName(), "Staff failed to authorize (Authorizing took too long).", ActionType.AUTHORIZATION_STATE);
         }
         time--;
     }

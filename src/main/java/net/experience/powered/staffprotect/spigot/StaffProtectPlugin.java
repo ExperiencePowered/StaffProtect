@@ -5,23 +5,19 @@ import net.experience.powered.staffprotect.StaffProtectProvider;
 import net.experience.powered.staffprotect.notification.NotificationBus;
 import net.experience.powered.staffprotect.notification.NotificationManager;
 import net.experience.powered.staffprotect.notification.Subscriber;
-import net.experience.powered.staffprotect.records.CapturedRecordFile;
+import net.experience.powered.staffprotect.records.ActionType;
 import net.experience.powered.staffprotect.records.Record;
 import net.experience.powered.staffprotect.records.RecordFile;
 import net.experience.powered.staffprotect.spigot.commands.StaffProtectCommand;
-import net.experience.powered.staffprotect.spigot.database.AbstractDatabase;
-import net.experience.powered.staffprotect.spigot.database.DatabaseProperties;
+import net.experience.powered.staffprotect.database.AbstractDatabase;
+import net.experience.powered.staffprotect.database.DatabaseProperties;
 import net.experience.powered.staffprotect.spigot.database.MySQL;
 import net.experience.powered.staffprotect.spigot.database.SQLite;
-import net.experience.powered.staffprotect.spigot.impl.AddonManagerImpl;
-import net.experience.powered.staffprotect.spigot.impl.StaffProtectImpl;
-import net.experience.powered.staffprotect.spigot.impl.SubscriberImpl;
-import net.experience.powered.staffprotect.spigot.impl.VerificationImpl;
+import net.experience.powered.staffprotect.spigot.impl.*;
 import net.experience.powered.staffprotect.spigot.listeners.InventoryListener;
 import net.experience.powered.staffprotect.spigot.listeners.PlayerListener;
 import net.experience.powered.staffprotect.spigot.messages.PluginMessageManager;
 import net.experience.powered.staffprotect.spigot.utils.Metrics;
-import net.experience.powered.staffprotect.util.Counter;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
@@ -48,6 +44,8 @@ import java.util.*;
 
 public final class StaffProtectPlugin extends JavaPlugin {
 
+    public static ZoneId zoneId;
+
     private static StaffProtectPlugin instance;
     private static boolean bungee;
     private PluginMessageManager messageManager;
@@ -55,6 +53,11 @@ public final class StaffProtectPlugin extends JavaPlugin {
     private Metrics metrics;
     private VersionController versionController;
     private StaffProtect api;
+
+    public StaffProtectPlugin() {
+        final String string = getConfig().getString("zoneId", "");
+        zoneId = string.equalsIgnoreCase("") ? ZoneId.systemDefault() : ZoneId.of(string);
+    }
 
     @Override
     public void onEnable() {
@@ -118,27 +121,8 @@ public final class StaffProtectPlugin extends JavaPlugin {
 
         api.getCommandManager().register(new StaffProtectCommand(api));
 
-        File file;
-        {
-            final SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yy");
-            final String string = getConfig().getString("zoneId", "");
-            final ZoneId zoneId = string.equalsIgnoreCase("") ? ZoneId.systemDefault() : ZoneId.of(string);
-            final Instant instant = Instant.now(Clock.system(zoneId));
-            final String date = dateFormat.format(Date.from(instant));
-            final Counter counter = new Counter();
-            file = new File(RecordFile.folder, date + ".txt");
-            try {
-                while (!file.createNewFile()) {
-                    file = new File(RecordFile.folder, date + "-" + counter + ".txt");
-                    counter.increment();
-                }
-            } catch (IOException e) {
-                getLogger().severe("Could not create record file : " + file);
-                e.printStackTrace();
-            }
-        }
-        final RecordFile recordFile = new RecordFile(file);
-        recordFile.writeRecord(new Record(System.currentTimeMillis(), "Server", "StaffProtect was enabled."));
+        new RecordFileImpl();
+        NotificationManager.getInstance().sendQuietMessage("Server", "StaffProtect was enabled.", ActionType.SERVER_STATE);
 
         metrics = new Metrics(this, 19629);
         metrics.addCustomChart(new Metrics.SingleLineChart("amount_of_addons", () -> api.getAddonManager().getAddons().size()));
@@ -167,8 +151,9 @@ public final class StaffProtectPlugin extends JavaPlugin {
 
         final RecordFile recordFile = RecordFile.getInstance();
         if (recordFile != null) {
-            recordFile.writeRecord(new Record(System.currentTimeMillis(), "Server", "StaffProtect was disabled."));
-            recordFile.writeRecord(new Record(System.currentTimeMillis(), "StaffProtect", "Saved file."));
+            NotificationManager notificationManager = NotificationManager.getInstance();
+            notificationManager.sendQuietMessage("Server", "StaffProtect was disabled.", ActionType.SERVER_STATE);
+            notificationManager.sendQuietMessage("StaffProtect", "Saved file.", ActionType.PLUGIN);
         }
         if (database != null) {
             database.disconnect();
@@ -235,15 +220,19 @@ public final class StaffProtectPlugin extends JavaPlugin {
     private void getNotificationManager() {
         new NotificationManager(this, api.getNotificationBus()) {
             @Override
-            public void sendMessage(final @Nullable String player, final @NotNull Component component) {
+            public void sendMessage(final @Nullable String player, final @NotNull UUID uuid, final @NotNull Component component, final @NotNull ActionType actionType) {
                 final BukkitAudiences audience = BukkitAudiences.create(api.getPlugin());
-                bus.getSubscribers().forEach(uuid -> audience.player(uuid).sendMessage(component));
-                sendQuietMessage(player, PlainTextComponentSerializer.plainText().serialize(component));
+                bus.getModernSubscribers().forEach(sub -> {
+                    if (!sub.getIgnoredPlayers().contains(uuid)) {
+                        audience.player(sub.getUniqueId()).sendMessage(component);
+                    }
+                });
+                sendQuietMessage(player, PlainTextComponentSerializer.plainText().serialize(component), actionType);
             }
 
             @Override
-            public void sendQuietMessage(final @Nullable String player, final @NotNull String string) {
-                RecordFile.getInstance().writeRecord(new Record(System.currentTimeMillis(), player == null ? "Anonymous" : player, string));
+            public void sendQuietMessage(final @Nullable String player, final @NotNull String string, final @NotNull ActionType actionType) {
+                RecordFile.getInstance().writeRecord(new Record(Instant.now(Clock.system(zoneId)).toEpochMilli(), player == null ? "Anonymous" : player, actionType, string));
             }
         };
     }

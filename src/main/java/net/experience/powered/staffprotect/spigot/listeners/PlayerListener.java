@@ -1,15 +1,13 @@
 package net.experience.powered.staffprotect.spigot.listeners;
 
-import net.experience.powered.staffprotect.records.Record;
-import net.experience.powered.staffprotect.records.RecordFile;
-import net.experience.powered.staffprotect.spigot.StaffProtectPlugin;
-import net.experience.powered.staffprotect.spigot.impl.SenderImpl;
-import net.experience.powered.staffprotect.spigot.impl.VerificationImpl;
 import net.experience.powered.staffprotect.StaffProtect;
 import net.experience.powered.staffprotect.events.PlayerPreVerifyEvent;
 import net.experience.powered.staffprotect.events.PlayerVerifyEvent;
 import net.experience.powered.staffprotect.notification.NotificationManager;
-import net.experience.powered.staffprotect.spigot.messages.PluginMessageManager;
+import net.experience.powered.staffprotect.records.ActionType;
+import net.experience.powered.staffprotect.spigot.StaffProtectPlugin;
+import net.experience.powered.staffprotect.spigot.impl.SenderImpl;
+import net.experience.powered.staffprotect.spigot.impl.VerificationImpl;
 import net.experience.powered.staffprotect.spigot.utils.Authorizer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -26,7 +24,6 @@ import org.bukkit.event.player.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.net.InetSocketAddress;
-import java.util.Optional;
 
 import static net.kyori.adventure.text.format.NamedTextColor.*;
 
@@ -48,10 +45,10 @@ public class PlayerListener implements Listener {
         if (staff) {
             final InetSocketAddress address = player.getAddress();
             if (address != null) {
-                RecordFile.getInstance().writeRecord(new Record(System.currentTimeMillis(), player.getName(), "Staff has joined with address (" + address.getHostName() + ":" + address.getPort() + ")."));
+                NotificationManager.getInstance().sendQuietMessage(player.getName(), "Staff has joined with address (" + address.getHostName() + ":" + address.getPort() + ").", ActionType.PLAYER_CONNECTION);
             }
             else {
-                RecordFile.getInstance().writeRecord(new Record(System.currentTimeMillis(), player.getName(), player.getName() + " has joined."));
+                NotificationManager.getInstance().sendQuietMessage(player.getName(), player.getName() + " has joined.", ActionType.PLAYER_CONNECTION);
             }
         }
         if (verification && staff || verification && player.isOp()) {
@@ -72,14 +69,12 @@ public class PlayerListener implements Listener {
                     });
         }
         else if (!verification && StaffProtectPlugin.isBungee()) {
-            Optional<PluginMessageManager> optional = plugin.getMessageManager();
-            optional.ifPresent(pluginMessageManager -> pluginMessageManager.sendAuthorization(player));
             Authorizer.authorize(player);
+            VerificationImpl.getInstance().forceAuthorize(player);
         }
         else if (verification && !staff || verification && !player.isOp()) {
-            Optional<PluginMessageManager> optional = plugin.getMessageManager();
-            optional.ifPresent(pluginMessageManager -> pluginMessageManager.sendAuthorization(player));
             Authorizer.authorize(player);
+            VerificationImpl.getInstance().forceAuthorize(player);
         }
     }
 
@@ -119,7 +114,7 @@ public class PlayerListener implements Listener {
                     Component component = Component.text("Authorized player ", RED)
                             .append(Component.text(player.getName(), BLUE))
                             .append(Component.text(".", RED));
-                    NotificationManager.getInstance().sendMessage(player.getName(), component);
+                    NotificationManager.getInstance().sendMessage(player.getName(), player.getUniqueId(), component, ActionType.AUTHORIZATION_STATE);
 
                     if (player.hasPermission("staffprotect.notification")) {
                         api.getNotificationBus().subscribe(player.getUniqueId());
@@ -133,7 +128,7 @@ public class PlayerListener implements Listener {
                     Component component = Component.text("Failed to authorize player ", RED)
                             .append(Component.text(player.getName(), BLUE))
                             .append(Component.text(".", RED));
-                    NotificationManager.getInstance().sendMessage(player.getName(), component);
+                    NotificationManager.getInstance().sendMessage(player.getName(), player.getUniqueId(), component, ActionType.AUTHORIZATION_STATE);
                 }
 
                 Bukkit.getPluginManager().callEvent(verifyEvent);
@@ -150,10 +145,10 @@ public class PlayerListener implements Listener {
         if (staff) {
             final InetSocketAddress address = player.getAddress();
             if (address != null) {
-                RecordFile.getInstance().writeRecord(new Record(System.currentTimeMillis(), player.getName(), "Staff has left with address (" + address.getHostName() + ":" + address.getPort() + ")."));
+                NotificationManager.getInstance().sendQuietMessage(player.getName(), "Staff has left with address (" + address.getHostName() + ":" + address.getPort() + ").", ActionType.PLAYER_CONNECTION);
             }
             else {
-                RecordFile.getInstance().writeRecord(new Record(System.currentTimeMillis(), player.getName(), player.getName() + " has left."));
+                NotificationManager.getInstance().sendQuietMessage(player.getName(), player.getName() + " has left.", ActionType.PLAYER_CONNECTION);
             }
         }
         if (!VerificationImpl.getInstance().isAuthorized(player)) {
@@ -174,7 +169,7 @@ public class PlayerListener implements Listener {
                             .append(Component.text(" tried to access command ", RED))
                             .append(Component.text(e.getMessage(), GOLD))
                             .append(Component.text(".", RED));
-            NotificationManager.getInstance().sendMessage(player.getName(), component);
+            NotificationManager.getInstance().sendMessage(player.getName(), player.getUniqueId(), component, ActionType.COMMAND_USE);
             e.setCancelled(true);
             return;
         }
@@ -182,7 +177,7 @@ public class PlayerListener implements Listener {
         final Component component =  MiniMessage.miniMessage().deserialize(plugin.getConfig().getString("notification.command.executed", fallback),
                 Placeholder.parsed("player", player.getName()),
                 Placeholder.parsed("command", e.getMessage()));
-        NotificationManager.getInstance().sendMessage(player.getName(), component);
+        NotificationManager.getInstance().sendMessage(player.getName(), player.getUniqueId(), component, ActionType.COMMAND_USE);
     }
 
     @EventHandler(priority = EventPriority.HIGH)

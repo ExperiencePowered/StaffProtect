@@ -17,7 +17,6 @@ import static net.kyori.adventure.text.format.NamedTextColor.BLUE;
 
 public class AddonsSub extends Subcommand {
 
-
     @Override
     public boolean command(@NotNull CommandSender sender, @NotNull String[] args) {
         final Set<AbstractAddon> addons = StaffProtect.getInstance().getAddonManager().getAddons();

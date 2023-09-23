@@ -3,10 +3,10 @@ package net.experience.powered.staffprotect.spigot.impl;
 import com.warrenstrange.googleauth.GoogleAuthenticator;
 import com.warrenstrange.googleauth.GoogleAuthenticatorKey;
 import net.experience.powered.staffprotect.global.EncodingUtil;
-import net.experience.powered.staffprotect.records.Record;
-import net.experience.powered.staffprotect.records.RecordFile;
+import net.experience.powered.staffprotect.notification.NotificationManager;
+import net.experience.powered.staffprotect.records.ActionType;
 import net.experience.powered.staffprotect.spigot.StaffProtectPlugin;
-import net.experience.powered.staffprotect.spigot.database.AbstractDatabase;
+import net.experience.powered.staffprotect.database.AbstractDatabase;
 import net.experience.powered.staffprotect.spigot.messages.PluginMessageManager;
 import net.experience.powered.staffprotect.spigot.utils.Expiring;
 import net.experience.powered.staffprotect.spigot.utils.QRCode;
@@ -131,7 +131,7 @@ public class VerificationImpl extends Verification {
             end(player);
             Optional<PluginMessageManager> optional = plugin.getMessageManager();
             optional.ifPresent(pluginMessageManager -> pluginMessageManager.sendAuthorization(player));
-            RecordFile.getInstance().writeRecord(new Record(System.currentTimeMillis(), player.getName(), "Staff was authorized."));
+            NotificationManager.getInstance().sendQuietMessage(player.getName(), "Staff was authorized.", ActionType.AUTHORIZATION_STATE);
         }
         return result;
     }

@@ -4,6 +4,9 @@ zoneId: ""
 # write it there, otherwise leave "" for system's timezone
 # Search for timezones here https://timezonedb.com/time-zones
 # Example of valid timezone is Europe/Prague
+dateFormat: "YYYY.MM.dd HH:mm"
+# This is how time will be formatted when looking through notifications using record subcommand
+# For patterns, head to https://docs.oracle.com/javase/8/docs/api/java/text/SimpleDateFormat.html
 database:
   type: "SQLite"
   # Use if you have only one server, otherwise we recommend using MySQL,
@@ -71,3 +74,12 @@ commands:
     already:
       disabled: "<red>Addon is already disabled."
       enabled: "<red>Addon is already enabled."
+  records:
+    parse-error: "<red>Couldn't parse limit as a number!"
+    # If you need list of actions, you acn see them on this page https://github.com/ExperiencePowered/StaffProtect/wiki/ActionTypes
+    unknown-action: "<red>This action does not exist."
+    invalid-time: "<red>This time does not follow time format! (e.g. 01-11-23)"
+    # Time format is day-month-year
+    processing-query: "<gold>Processing query, this may take a while!"
+    found-results: "<gold>We have found out <red><result_amount></red> results!"
+    result: "<red>(<time>)</red> <gold><player>: <content>"

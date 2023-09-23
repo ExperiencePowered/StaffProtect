@@ -1,10 +1,11 @@
 package net.experience.powered.staffprotect;
 
 import net.experience.powered.staffprotect.addons.AddonManager;
+import net.experience.powered.staffprotect.database.AbstractDatabase;
+import net.experience.powered.staffprotect.database.DatabaseProperties;
 import net.experience.powered.staffprotect.notification.NotificationBus;
 import net.experience.powered.staffprotect.notification.Sender;
 import net.experience.powered.staffprotect.util.CommandRegisterer;
-import net.md_5.bungee.api.plugin.Plugin;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.ServicesManager;

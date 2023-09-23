@@ -1,4 +1,4 @@
-package net.experience.powered.staffprotect.spigot.database;
+package net.experience.powered.staffprotect.database;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -29,6 +29,10 @@ public class DatabaseProperties {
 
     public void write(final @NotNull String property, final @NotNull Object obj) {
         properties.put(property, obj);
+    }
+
+    public void remove(final @NotNull String property) {
+        properties.remove(property);
     }
 
     public Object getProperty(final @NotNull String property) {

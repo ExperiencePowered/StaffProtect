@@ -1,12 +1,12 @@
 package net.experience.powered.staffprotect.spigot.database;
 
+import net.experience.powered.staffprotect.database.AbstractDatabase;
+import net.experience.powered.staffprotect.database.DatabaseProperties;
 import net.experience.powered.staffprotect.spigot.StaffProtectPlugin;
 import org.bukkit.Bukkit;
 import org.jetbrains.annotations.NotNull;
 
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.SQLSyntaxErrorException;
+import java.sql.*;
 
 public final class MySQL extends AbstractDatabase {
     public MySQL(final @NotNull DatabaseProperties properties) {
