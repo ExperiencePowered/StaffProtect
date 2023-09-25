@@ -1,4 +1,4 @@
-package net.experience.powered.staffprotect.spigot.database;
+package net.experience.powered.staffprotect.database;
 
 import org.jetbrains.annotations.NotNull;
 

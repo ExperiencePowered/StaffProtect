@@ -2,8 +2,12 @@ package net.experience.powered.staffprotect.spigot.impl;
 
 import net.experience.powered.staffprotect.StaffProtect;
 import net.experience.powered.staffprotect.addons.AddonManager;
+import net.experience.powered.staffprotect.database.AbstractDatabase;
+import net.experience.powered.staffprotect.database.DatabaseProperties;
 import net.experience.powered.staffprotect.notification.NotificationBus;
 import net.experience.powered.staffprotect.notification.Sender;
+import net.experience.powered.staffprotect.spigot.database.MySQL;
+import net.experience.powered.staffprotect.spigot.database.SQLite;
 import net.experience.powered.staffprotect.util.CommandRegisterer;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
